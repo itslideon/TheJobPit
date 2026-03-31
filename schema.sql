@@ -1,4 +1,4 @@
--- Database Schema for TheJobPit
+-- Database schema
 CREATE TABLE IF NOT EXISTS applications (
     id SERIAL PRIMARY KEY,
     company_name VARCHAR(100) NOT NULL,
@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS applications (
     notes TEXT
 );
 
--- Mock Data for testing
+-- Mock Data for testing oni
 INSERT INTO applications (company_name, job_role, status) 
 VALUES ('Google', 'Software Engineer', 'Applied'),
        ('TikTok', 'Backend Dev', 'Interviewing');
