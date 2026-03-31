@@ -14,39 +14,41 @@ This app is both practical for your own search and a strong portfolio piece beca
 
 - CRUD data modeling
 - API design and validation
+- authentication and multi-tenant data scoping
 - reminder/deadline workflows
 - dashboard analytics with charts
 - clean full-stack architecture
 
 ## Tech Stack
 
-- Next.js (App Router) + TypeScript
+- Next.js 15 (App Router) + React 19 + TypeScript
 - Prisma ORM + PostgreSQL
 - Tailwind CSS
+- Auth.js / NextAuth v5 (credentials) + bcryptjs
 - Recharts (data visualization)
 - Zod (input validation)
 
-## Current Scope (v1 scaffold)
+## App routes
 
-- Application data model in Prisma
-- REST API routes:
-  - `GET /api/applications`
-  - `POST /api/applications`
-  - `GET /api/applications/:id`
-  - `PATCH /api/applications/:id`
-  - `DELETE /api/applications/:id`
-- Dashboard homepage with:
-  - total applications metric
-  - active pipeline metric
-  - follow-ups due metric
-  - status distribution pie chart
-- Workspace pages (same theme):
-  - `/lab` — resume and cover letter versions per application (PDF/Word upload or text; files stored under `public/uploads/documents/` locally — use object storage for production serverless)
-  - `/interview` — STAR stories, question bank, mock interview notes
-  - `/companies` — company profiles, salary bands, contacts and referrals
-- Legal pages: `/privacy`, `/terms`
+| Path | Notes |
+|------|--------|
+| `/` | Public landing; signed-in users also see a live **snapshot** (metrics + pipeline chart) |
+| `/dashboard` | Full dashboard (metrics, chart, quick links) — **requires sign-in** |
+| `/applications`, `/lab`, `/interview`, `/companies` | Feature areas — **require sign-in** |
+| `/login`, `/signup` | Credentials; signed-in users are redirected away |
+| `/privacy`, `/terms` | Legal |
 
-After pulling new schema changes, run `npx prisma db push` and `npx prisma generate` (stop `npm run dev` first if Windows locks the Prisma engine file).
+Middleware sends unauthenticated visitors to `/login?callbackUrl=…` when they hit protected paths.
+
+## Current scope
+
+- **Auth:** register (`POST /api/register`), session via NextAuth; data is scoped by `userId`.
+- **Applications** — CRUD via `/api/applications` and `/api/applications/:id` (session required).
+- **Related APIs:** application documents (incl. upload), star stories, interview questions, mock interviews, companies, company contacts (all session-scoped where applicable).
+- **Workspace pages** (same black/red theme): resume lab, interview prep, company intel (see routes above).
+- **Legal pages:** `/privacy`, `/terms`
+
+After pulling schema changes, run `npx prisma db push` and `npx prisma generate` (stop `npm run dev` first on Windows if the Prisma engine file is locked).
 
 ## Getting Started
 
@@ -54,7 +56,7 @@ After pulling new schema changes, run `npx prisma db push` and `npx prisma gener
 
 - Node.js 20+
 - npm 10+ (or pnpm/yarn if preferred)
-- PostgreSQL running locally (or cloud instance)
+- PostgreSQL running locally (or a cloud instance)
 
 ### 2) Install dependencies
 
@@ -70,13 +72,13 @@ Copy the sample env file:
 cp .env.example .env
 ```
 
-Update `DATABASE_URL` in `.env` with your Postgres connection string.
+Set at least:
 
-Example:
-
-```env
-DATABASE_URL="postgresql://postgres:your_password@localhost:5432/thejobpit?schema=public"
-```
+| Variable | Purpose |
+|----------|---------|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `AUTH_SECRET` | Long random string used by Auth.js to sign cookies (e.g. `openssl rand -base64 32`) |
+| `AUTH_URL` | App origin, e.g. `http://localhost:3000` in development |
 
 ### 4) Create DB schema and Prisma client
 
@@ -91,7 +93,7 @@ npx prisma generate
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+Open `http://localhost:3000`. Create an account at `/signup`, then use the dashboard and APIs as that user.
 
 ### Windows PowerShell Notes
 
@@ -103,34 +105,25 @@ Open `http://localhost:3000`.
 
 ## Available Scripts
 
-- `npm run dev` - start Next.js dev server
-- `npm run build` - create production build
-- `npm run start` - run production server
-- `npm run lint` - run lints
-- `npm run db:push` - sync Prisma schema to DB
-- `npm run db:studio` - open Prisma Studio
+- `npm run dev` — start Next.js dev server
+- `npm run build` — production build
+- `npm run start` — production server
+- `npm run lint` — ESLint
+- `npm run db:push` — sync Prisma schema to DB
+- `npm run db:studio` — Prisma Studio
 
-## Prisma Model
+## Data model (overview)
 
-Main model: `Application`
+- **`User`** — email, password hash, name; owns applications and related records.
+- **`Application`** — company, role, location, status, dates, notes; **`userId`** for scoping.
+- Additional models: documents, STAR stories, interview questions, mock notes, companies, contacts (see `prisma/schema.prisma`).
 
-- core fields: `company`, `role`, `location`, `sourceUrl`, `notes`
-- lifecycle: `status`
-- date tracking: `appliedAt`, `deadlineAt`, `followUpAt`
-- metadata: `createdAt`, `updatedAt`
+Application **status** enum: `WISHLIST`, `APPLIED`, `INTERVIEW`, `OFFER`, `REJECTED`, `WITHDRAWN`.
 
-Status enum:
+## API notes
 
-- `WISHLIST`
-- `APPLIED`
-- `INTERVIEW`
-- `OFFER`
-- `REJECTED`
-- `WITHDRAWN`
-
-## API Payload Example
-
-`POST /api/applications`
+- **Session required** for `/api/applications` and other app APIs (except `/api/auth/*` and `POST /api/register`). Unauthenticated requests return **401**.
+- Example create payload for `POST /api/applications` (fields validated with Zod):
 
 ```json
 {
@@ -146,40 +139,47 @@ Status enum:
 }
 ```
 
-## API Endpoints
+## Quick smoke test
 
-- `GET /api/applications` - list all applications
-- `POST /api/applications` - create application
-- `GET /api/applications/:id` - get application by id
-- `PATCH /api/applications/:id` - update fields on an application
-- `DELETE /api/applications/:id` - remove an application
+1. Configure `.env` (including `AUTH_SECRET`).
+2. Run `npx prisma db push` and `npm run dev`.
+3. Open `/signup`, create a user, then open `/dashboard` and `/applications`.
+4. Add an application in the UI and confirm metrics on `/` or `/dashboard` update.
 
-## Quick Smoke Test
+Calling `GET /api/applications` without a session cookie will not return data (401).
 
-1. Start the app: `npm run dev`
-2. In a second terminal:
-   - `Invoke-RestMethod http://localhost:3000/api/applications`
-3. Create one record:
-   - `Invoke-RestMethod -Method Post -Uri http://localhost:3000/api/applications -ContentType "application/json" -Body '{"company":"Acme","role":"Frontend Engineer","status":"APPLIED"}'`
-4. Refresh `http://localhost:3000` and confirm dashboard metrics update.
-
-## Project Structure
+## Project structure (high level)
 
 ```txt
 prisma/
   schema.prisma
 src/
   app/
-    api/applications/
-      route.ts
-      [id]/route.ts
+    api/              # REST handlers (applications, auth, documents, companies, …)
+    dashboard/
+    applications/
+    lab/
+    interview/
+    companies/
+    login/
+    signup/
+    privacy/
+    terms/
     layout.tsx
-    page.tsx
+    page.tsx          # landing (+ optional snapshot when signed in)
+  auth.ts             # NextAuth config
+  middleware.ts
   components/
-    pipeline-chart.tsx
   lib/
     prisma.ts
     validation.ts
+    pipeline-insights.ts
+    session-user.ts
   types/
-    application.ts
 ```
+
+Uploads for documents are stored under `public/uploads/documents/` locally; use object storage for production serverless deployments.
+
+## Deployment
+
+Set `DATABASE_URL`, `AUTH_SECRET`, and `AUTH_URL` to your production URL in the host’s environment. Run migrations or `prisma db push` against the production database as appropriate for your workflow.
