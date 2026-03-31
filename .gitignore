@@ -137,3 +137,7 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# User uploads (keep folder via .gitkeep)
+public/uploads/documents/*
+!public/uploads/documents/.gitkeep

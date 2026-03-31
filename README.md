@@ -40,6 +40,13 @@ This app is both practical for your own search and a strong portfolio piece beca
   - active pipeline metric
   - follow-ups due metric
   - status distribution pie chart
+- Workspace pages (same theme):
+  - `/lab` — resume and cover letter versions per application (PDF/Word upload or text; files stored under `public/uploads/documents/` locally — use object storage for production serverless)
+  - `/interview` — STAR stories, question bank, mock interview notes
+  - `/companies` — company profiles, salary bands, contacts and referrals
+- Legal pages: `/privacy`, `/terms`
+
+After pulling new schema changes, run `npx prisma db push` and `npx prisma generate` (stop `npm run dev` first if Windows locks the Prisma engine file).
 
 ## Getting Started
 

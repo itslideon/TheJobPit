@@ -7,6 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id                   String                @id @default(cuid())
+  email                String                @unique
+  passwordHash         String
+  name                 String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  applications         Application[]
+  companies            Company[]
+  starStories          StarStory[]
+  interviewQuestions   InterviewQuestion[]
+}
+
 enum ApplicationStatus {
   WISHLIST
   APPLIED
@@ -17,16 +30,110 @@ enum ApplicationStatus {
 }
 
 model Application {
-  id         String            @id @default(cuid())
-  company    String
-  role       String
-  location   String?
-  sourceUrl  String?
+  id                  String                 @id @default(cuid())
+  userId              String?
+  user                User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company             String
+  role                String
+  location            String?
+  sourceUrl           String?
+  notes               String?
+  status              ApplicationStatus      @default(WISHLIST)
+  appliedAt           DateTime?
+  deadlineAt          DateTime?
+  followUpAt          DateTime?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  documents           ApplicationDocument[]
+  starStories         StarStory[]
+  interviewQuestions  InterviewQuestion[]
+  mockInterviewNotes  MockInterviewNote[]
+}
+
+enum DocumentType {
+  RESUME
+  COVER_LETTER
+}
+
+model ApplicationDocument {
+  id                     String        @id @default(cuid())
+  applicationId          String
+  application            Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  type                   DocumentType
+  title                  String
+  content                String        @default("")
+  attachmentUrl          String?
+  attachmentOriginalName String?
+  attachmentMime         String?
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+}
+
+model StarStory {
+  id            String       @id @default(cuid())
+  userId        String?
+  user          User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId String?
+  application   Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  title         String
+  situation     String
+  task          String
+  action        String
+  result        String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model InterviewQuestion {
+  id            String       @id @default(cuid())
+  userId        String?
+  user          User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId String?
+  application   Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  question      String
+  answer        String?
+  category      String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model MockInterviewNote {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  occurredAt    DateTime?
+  notes         String
+  rating        Int?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Company {
+  id        String           @id @default(cuid())
+  userId    String?
+  user      User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  website   String?
+  industry  String?
+  salaryMin Int?
+  salaryMax Int?
+  currency  String?          @default("USD")
+  notes     String?
+  contacts  CompanyContact[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}
+
+model CompanyContact {
+  id         String   @id @default(cuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name       String
+  role       String?
+  email      String?
+  linkedin   String?
+  isReferral Boolean  @default(false)
   notes      String?
-  status     ApplicationStatus @default(WISHLIST)
-  appliedAt  DateTime?
-  deadlineAt DateTime?
-  followUpAt DateTime?
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

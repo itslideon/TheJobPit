@@ -14,8 +14,8 @@ type PipelineChartProps = {
 
 export function PipelineChart({ data }: PipelineChartProps) {
   return (
-    <div className="h-72 w-full rounded-xl border border-slate-800 bg-slate-950/70 p-4">
-      <h2 className="mb-3 text-lg font-semibold text-slate-100">Pipeline by status</h2>
+    <div className="h-72 w-full rounded-xl border border-red-950 bg-black/70 p-4">
+      <h2 className="mb-3 text-lg font-semibold text-red-100">Pipeline by status</h2>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie data={data} dataKey="value" nameKey="name" outerRadius={90} label>
@@ -23,7 +23,14 @@ export function PipelineChart({ data }: PipelineChartProps) {
               <Cell key={entry.name} fill={entry.color} />
             ))}
           </Pie>
-          <Tooltip />
+          <Tooltip
+            contentStyle={{
+              background: "#0a0a0a",
+              border: "1px solid #7f1d1d",
+              borderRadius: "10px",
+              color: "#fee2e2"
+            }}
+          />
         </PieChart>
       </ResponsiveContainer>
     </div>

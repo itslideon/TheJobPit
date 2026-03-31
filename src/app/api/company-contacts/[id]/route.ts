@@ -1,0 +1,52 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { requireUserId } from "@/lib/session-user";
+import { updateCompanyContactSchema } from "@/lib/validation";
+
+type Ctx = { params: Promise<{ id: string }> };
+
+export async function PATCH(request: Request, { params }: Ctx) {
+  const { id } = await params;
+  const { userId, response } = await requireUserId();
+  if (!userId) return response!;
+
+  const body = await request.json();
+  const parsed = updateCompanyContactSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Invalid payload", details: parsed.error.flatten() },
+      { status: 400 }
+    );
+  }
+
+  const contact = await prisma.companyContact.findFirst({
+    where: { id },
+    include: { company: true }
+  });
+  if (!contact || contact.company.userId !== userId) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const data = await prisma.companyContact.update({
+    where: { id },
+    data: parsed.data
+  });
+  return NextResponse.json({ data });
+}
+
+export async function DELETE(_request: Request, { params }: Ctx) {
+  const { id } = await params;
+  const { userId, response } = await requireUserId();
+  if (!userId) return response!;
+
+  const contact = await prisma.companyContact.findFirst({
+    where: { id },
+    include: { company: true }
+  });
+  if (!contact || contact.company.userId !== userId) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  await prisma.companyContact.delete({ where: { id } });
+  return NextResponse.json({ ok: true });
+}

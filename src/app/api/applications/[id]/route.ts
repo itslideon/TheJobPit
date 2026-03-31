@@ -1,16 +1,19 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireUserId } from "@/lib/session-user";
 import { updateApplicationSchema } from "@/lib/validation";
 
 type RouteContext = {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 };
 
 export async function GET(_request: Request, { params }: RouteContext) {
-  const application = await prisma.application.findUnique({
-    where: { id: params.id }
+  const { id } = await params;
+  const { userId, response } = await requireUserId();
+  if (!userId) return response!;
+
+  const application = await prisma.application.findFirst({
+    where: { id, userId }
   });
 
   if (!application) {
@@ -21,6 +24,10 @@ export async function GET(_request: Request, { params }: RouteContext) {
 }
 
 export async function PATCH(request: Request, { params }: RouteContext) {
+  const { id } = await params;
+  const { userId, response } = await requireUserId();
+  if (!userId) return response!;
+
   const body = await request.json();
   const parseResult = updateApplicationSchema.safeParse(body);
 
@@ -31,26 +38,36 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     );
   }
 
-  try {
-    const application = await prisma.application.update({
-      where: { id: params.id },
-      data: parseResult.data
-    });
-
-    return NextResponse.json({ data: application });
-  } catch {
+  const existing = await prisma.application.findFirst({
+    where: { id, userId }
+  });
+  if (!existing) {
     return NextResponse.json({ error: "Application not found" }, { status: 404 });
   }
+
+  const application = await prisma.application.update({
+    where: { id },
+    data: parseResult.data
+  });
+
+  return NextResponse.json({ data: application });
 }
 
 export async function DELETE(_request: Request, { params }: RouteContext) {
-  try {
-    await prisma.application.delete({
-      where: { id: params.id }
-    });
+  const { id } = await params;
+  const { userId, response } = await requireUserId();
+  if (!userId) return response!;
 
-    return NextResponse.json({ ok: true });
-  } catch {
+  const existing = await prisma.application.findFirst({
+    where: { id, userId }
+  });
+  if (!existing) {
     return NextResponse.json({ error: "Application not found" }, { status: 404 });
   }
+
+  await prisma.application.delete({
+    where: { id }
+  });
+
+  return NextResponse.json({ ok: true });
 }
