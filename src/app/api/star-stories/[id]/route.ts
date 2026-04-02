@@ -26,9 +26,35 @@ export async function PATCH(request: Request, { params }: Ctx) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
+  const p = parsed.data;
+  const nextIsPublic = p.isPublic !== undefined ? p.isPublic : existing.isPublic;
+  const nextApplicationId =
+    p.applicationId !== undefined ? p.applicationId : existing.applicationId;
+  const nextShareFlag =
+    p.shareCompanyContext !== undefined ? p.shareCompanyContext : existing.shareCompanyContext;
+
+  if (nextShareFlag && !nextApplicationId) {
+    return NextResponse.json(
+      { error: "Link an application to share company and role, or turn off company context." },
+      { status: 400 }
+    );
+  }
+  if (!nextIsPublic && p.shareCompanyContext === true) {
+    return NextResponse.json(
+      { error: "Turn on community sharing before sharing company context." },
+      { status: 400 }
+    );
+  }
+
+  const shareCompanyContext =
+    Boolean(nextIsPublic) && Boolean(nextShareFlag) && Boolean(nextApplicationId);
+
   const data = await prisma.starStory.update({
     where: { id },
-    data: parsed.data
+    data: {
+      ...p,
+      shareCompanyContext
+    }
   });
   return NextResponse.json({ data });
 }

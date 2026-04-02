@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { applicationId, ...rest } = parsed.data;
+  const { applicationId, shareCompanyContext, isPublic, ...rest } = parsed.data;
   if (applicationId) {
     const app = await prisma.application.findFirst({
       where: { id: applicationId, userId }
@@ -41,11 +41,17 @@ export async function POST(request: Request) {
     }
   }
 
+  const wantPublic = Boolean(isPublic);
+  const wantCompany =
+    wantPublic && Boolean(shareCompanyContext) && Boolean(applicationId);
+
   const data = await prisma.starStory.create({
     data: {
       ...rest,
       userId,
-      applicationId: applicationId ?? null
+      applicationId: applicationId ?? null,
+      isPublic: wantPublic,
+      shareCompanyContext: wantCompany
     }
   });
 

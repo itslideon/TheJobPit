@@ -28,6 +28,9 @@ export default async function DashboardPage() {
           with a single view.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
+          <Link className="pit-btn-secondary" href="/profile">
+            Profile
+          </Link>
           <Link className="pit-btn-primary" href="/applications">
             Manage Applications
           </Link>

@@ -12,6 +12,14 @@ model User {
   email                String                @unique
   passwordHash         String
   name                 String?
+  headline             String?
+  bio                  String?
+  location             String?
+  phone                String?
+  linkedinUrl          String?
+  githubUrl            String?
+  twitterUrl           String?
+  websiteUrl           String?
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   applications         Application[]
@@ -82,18 +90,22 @@ model ApplicationDocument {
 }
 
 model StarStory {
-  id            String       @id @default(cuid())
-  userId        String?
-  user          User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  applicationId String?
-  application   Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
-  title         String
-  situation     String
-  task          String
-  action        String
-  result        String
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  id                    String       @id @default(cuid())
+  userId                String?
+  user                  User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId         String?
+  application           Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  title                 String
+  situation             String
+  task                  String
+  action                String
+  result                String
+  isPublic              Boolean      @default(false)
+  shareCompanyContext   Boolean      @default(false)
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  @@index([isPublic, updatedAt])
 }
 
 model InterviewQuestion {
@@ -105,8 +117,11 @@ model InterviewQuestion {
   question      String
   answer        String?
   category      String?
+  isPublic      Boolean      @default(false)
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
+
+  @@index([isPublic, updatedAt])
 }
 
 model MockInterviewNote {

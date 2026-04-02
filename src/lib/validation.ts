@@ -46,7 +46,9 @@ export const createStarStorySchema = z.object({
   situation: z.string().max(20_000),
   task: z.string().max(20_000),
   action: z.string().max(20_000),
-  result: z.string().max(20_000)
+  result: z.string().max(20_000),
+  isPublic: z.boolean().optional(),
+  shareCompanyContext: z.boolean().optional()
 });
 
 export const updateStarStorySchema = createStarStorySchema.partial();
@@ -55,7 +57,8 @@ export const createInterviewQuestionSchema = z.object({
   applicationId: z.string().cuid().optional().nullable(),
   question: z.string().trim().min(1).max(5000),
   answer: z.string().max(20_000).optional().nullable(),
-  category: z.string().trim().max(120).optional().nullable()
+  category: z.string().trim().max(120).optional().nullable(),
+  isPublic: z.boolean().optional()
 });
 
 export const updateInterviewQuestionSchema = createInterviewQuestionSchema.partial();
@@ -101,3 +104,29 @@ export const createCompanyContactSchema = z.object({
 });
 
 export const updateCompanyContactSchema = createCompanyContactSchema.partial();
+
+const emptyOrHttpUrl = z.union([z.literal(""), z.string().url().max(500)]);
+
+export const updateProfileSchema = z
+  .object({
+    name: z.string().max(120),
+    headline: z.string().max(160),
+    bio: z.string().max(5000),
+    location: z.string().max(120),
+    phone: z.string().max(40),
+    linkedinUrl: emptyOrHttpUrl,
+    githubUrl: emptyOrHttpUrl,
+    twitterUrl: emptyOrHttpUrl,
+    websiteUrl: emptyOrHttpUrl
+  })
+  .transform((d) => ({
+    name: d.name.trim() === "" ? null : d.name.trim(),
+    headline: d.headline.trim() === "" ? null : d.headline.trim(),
+    bio: d.bio.trim() === "" ? null : d.bio.trim(),
+    location: d.location.trim() === "" ? null : d.location.trim(),
+    phone: d.phone.trim() === "" ? null : d.phone.trim(),
+    linkedinUrl: d.linkedinUrl === "" ? null : d.linkedinUrl,
+    githubUrl: d.githubUrl === "" ? null : d.githubUrl,
+    twitterUrl: d.twitterUrl === "" ? null : d.twitterUrl,
+    websiteUrl: d.websiteUrl === "" ? null : d.websiteUrl
+  }));

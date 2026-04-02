@@ -78,26 +78,6 @@ export function LandingPage({ preview }: LandingPageProps) {
           )}
         </div>
         {!loggedIn ? (
-          <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-sm text-zinc-500">
-            <span className="text-zinc-600">Explore:</span>
-            <Link className="pit-link" href="/about">
-              About
-            </Link>
-            <Link className="pit-link" href="/features">
-              Features
-            </Link>
-            <Link className="pit-link" href="/faq">
-              FAQ
-            </Link>
-            <Link className="pit-link" href="/privacy">
-              Privacy
-            </Link>
-            <Link className="pit-link" href="/terms">
-              Terms
-            </Link>
-          </div>
-        ) : null}
-        {!loggedIn ? (
           <p className="mt-8 text-xs text-zinc-600">
             Free for personal use. By continuing you agree to our{" "}
             <Link className="pit-link" href="/terms">

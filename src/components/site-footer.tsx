@@ -73,6 +73,9 @@ export function SiteFooter() {
                   <FooterLink href="/dashboard">Dashboard</FooterLink>
                 </li>
                 <li>
+                  <FooterLink href="/profile">Profile</FooterLink>
+                </li>
+                <li>
                   <FooterLink href="/applications">Applications</FooterLink>
                 </li>
                 <li>
@@ -80,6 +83,9 @@ export function SiteFooter() {
                 </li>
                 <li>
                   <FooterLink href="/interview">Interview prep</FooterLink>
+                </li>
+                <li>
+                  <FooterLink href="/community">Community</FooterLink>
                 </li>
                 <li>
                   <FooterLink href="/companies">Company intel</FooterLink>

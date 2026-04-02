@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const faqs = [
   {
     q: "Do I need an account to use the tracker?",
-    a: "You can browse public pages (About, Features, FAQ) without signing in. The dashboard, applications, and workspace tools require a free account."
+    a: "You can browse public pages (Community, About, Features, FAQ) without signing in. The dashboard, applications, and workspace tools require a free account."
   },
   {
     q: "Can I track multiple applications at once?",
@@ -45,27 +45,16 @@ export default function FaqPage() {
         ))}
       </section>
 
-      <div className="mt-10 flex flex-col gap-4 border-t border-zinc-800/70 pt-8 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-zinc-500">
-          Still need something? Check{" "}
-          <Link href="/privacy" className="pit-link">
-            Privacy
-          </Link>{" "}
-          and{" "}
-          <Link href="/terms" className="pit-link">
-            Terms
-          </Link>
-          .
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <Link href="/signup" className="pit-btn-primary px-5">
-            Create account
-          </Link>
-          <Link href="/login" className="pit-btn-secondary px-5">
-            Log in
-          </Link>
-        </div>
-      </div>
+      <p className="mt-10 border-t border-zinc-800/70 pt-8 text-sm text-zinc-500">
+        More:{" "}
+        <Link className="pit-link" href="/about">
+          About
+        </Link>
+        {" · "}
+        <Link className="pit-link" href="/features">
+          Features
+        </Link>
+      </p>
     </MarketingPageShell>
   );
 }

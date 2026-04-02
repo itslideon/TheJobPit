@@ -11,7 +11,10 @@ function createPrismaClient() {
   });
 }
 
-/** Drop cached client if schema added models (e.g. PasswordResetToken) after `prisma generate`. */
+/**
+ * Drop cached dev client if `prisma generate` added models/delegates the old instance lacks.
+ * After schema changes, also restart `npm run dev` so queries validate against new User fields, etc.
+ */
 function replaceStaleDevClient() {
   if (process.env.NODE_ENV === "production") return;
   const g = global.prisma;

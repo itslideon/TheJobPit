@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 
 type Application = { id: string; company: string; role: string };
@@ -12,6 +13,8 @@ type StarRow = {
   task: string;
   action: string;
   result: string;
+  isPublic: boolean;
+  shareCompanyContext: boolean;
 };
 
 type QRow = {
@@ -20,6 +23,7 @@ type QRow = {
   question: string;
   answer: string | null;
   category: string | null;
+  isPublic: boolean;
 };
 
 type MockRow = {
@@ -46,12 +50,15 @@ export default function InterviewPage() {
     situation: "",
     task: "",
     action: "",
-    result: ""
+    result: "",
+    isPublic: false,
+    shareCompanyContext: false
   });
   const [qForm, setQForm] = useState({
     question: "",
     answer: "",
-    category: ""
+    category: "",
+    isPublic: false
   });
   const [mockForm, setMockForm] = useState({
     applicationId: "",
@@ -103,6 +110,8 @@ export default function InterviewPage() {
 
   async function addStar(e: FormEvent) {
     e.preventDefault();
+    const shareCompany =
+      starForm.isPublic && starForm.shareCompanyContext && Boolean(filterApp);
     await fetch("/api/star-stories", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -112,10 +121,29 @@ export default function InterviewPage() {
         situation: starForm.situation,
         task: starForm.task,
         action: starForm.action,
-        result: starForm.result
+        result: starForm.result,
+        isPublic: starForm.isPublic,
+        shareCompanyContext: shareCompany
       })
     });
-    setStarForm({ title: "", situation: "", task: "", action: "", result: "" });
+    setStarForm({
+      title: "",
+      situation: "",
+      task: "",
+      action: "",
+      result: "",
+      isPublic: false,
+      shareCompanyContext: false
+    });
+    await loadStars();
+  }
+
+  async function patchStar(id: string, patch: { isPublic?: boolean; shareCompanyContext?: boolean }) {
+    await fetch(`/api/star-stories/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch)
+    });
     await loadStars();
   }
 
@@ -134,10 +162,20 @@ export default function InterviewPage() {
         applicationId: filterApp || undefined,
         question: qForm.question,
         answer: qForm.answer || undefined,
-        category: qForm.category || undefined
+        category: qForm.category || undefined,
+        isPublic: qForm.isPublic
       })
     });
-    setQForm({ question: "", answer: "", category: "" });
+    setQForm({ question: "", answer: "", category: "", isPublic: false });
+    await loadQuestions();
+  }
+
+  async function patchQ(id: string, isPublic: boolean) {
+    await fetch(`/api/interview-questions/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isPublic })
+    });
     await loadQuestions();
   }
 
@@ -183,7 +221,11 @@ export default function InterviewPage() {
       <header className="pit-card p-6 shadow-pit">
         <h1 className="text-3xl font-bold text-zinc-50">Interview Prep Hub</h1>
         <p className="mt-2 text-sm text-zinc-400">
-          Build STAR stories, collect questions and answers, and log mock interview sessions.
+          Build STAR stories, collect questions and answers, and log mock interview sessions.{" "}
+          <Link className="pit-link" href="/community">
+            See what others have shared
+          </Link>
+          .
         </p>
       </header>
 
@@ -251,6 +293,40 @@ export default function InterviewPage() {
                 }
               />
             ))}
+            <label className="flex cursor-pointer items-start gap-2 text-xs text-zinc-400">
+              <input
+                type="checkbox"
+                className="mt-0.5 rounded border-zinc-600"
+                checked={starForm.isPublic}
+                onChange={(e) =>
+                  setStarForm((s) => ({
+                    ...s,
+                    isPublic: e.target.checked,
+                    shareCompanyContext: e.target.checked ? s.shareCompanyContext : false
+                  }))
+                }
+              />
+              <span>Share this STAR story on the public community feed (opt-in).</span>
+            </label>
+            <label
+              className={`flex cursor-pointer items-start gap-2 text-xs ${
+                starForm.isPublic && filterApp ? "text-zinc-400" : "text-zinc-600"
+              }`}
+            >
+              <input
+                type="checkbox"
+                disabled={!starForm.isPublic || !filterApp}
+                className="mt-0.5 rounded border-zinc-600"
+                checked={starForm.shareCompanyContext}
+                onChange={(e) =>
+                  setStarForm((s) => ({ ...s, shareCompanyContext: e.target.checked }))
+                }
+              />
+              <span>
+                When shared, include company &amp; role from the filtered application (requires a
+                application selected in the filter above).
+              </span>
+            </label>
             <button
               type="submit"
               className="pit-btn-primary w-full"
@@ -286,6 +362,33 @@ export default function InterviewPage() {
                     {"\n"}
                     <strong>R:</strong> {s.result}
                   </p>
+                  <div className="mt-3 flex flex-col gap-2 border-t border-zinc-800/80 pt-3">
+                    <label className="flex cursor-pointer items-center gap-2 text-xs text-zinc-500">
+                      <input
+                        type="checkbox"
+                        className="rounded border-zinc-600"
+                        checked={s.isPublic}
+                        onChange={(e) => void patchStar(s.id, { isPublic: e.target.checked })}
+                      />
+                      Community feed
+                    </label>
+                    <label
+                      className={`flex cursor-pointer items-center gap-2 text-xs ${
+                        s.isPublic && s.applicationId ? "text-zinc-500" : "text-zinc-600"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="rounded border-zinc-600"
+                        disabled={!s.isPublic || !s.applicationId}
+                        checked={s.shareCompanyContext}
+                        onChange={(e) =>
+                          void patchStar(s.id, { shareCompanyContext: e.target.checked })
+                        }
+                      />
+                      Show company &amp; role when shared
+                    </label>
+                  </div>
                 </li>
               ))
             )}
@@ -316,6 +419,15 @@ export default function InterviewPage() {
               value={qForm.answer}
               onChange={(e) => setQForm((q) => ({ ...q, answer: e.target.value }))}
             />
+            <label className="flex cursor-pointer items-start gap-2 text-xs text-zinc-400">
+              <input
+                type="checkbox"
+                className="mt-0.5 rounded border-zinc-600"
+                checked={qForm.isPublic}
+                onChange={(e) => setQForm((q) => ({ ...q, isPublic: e.target.checked }))}
+              />
+              <span>Share this Q&amp;A on the community feed (opt-in).</span>
+            </label>
             <button
               type="submit"
               className="pit-btn-primary w-full"
@@ -348,6 +460,15 @@ export default function InterviewPage() {
                   {q.answer ? (
                     <p className="mt-2 whitespace-pre-wrap text-xs text-zinc-400">{q.answer}</p>
                   ) : null}
+                  <label className="mt-3 flex cursor-pointer items-center gap-2 border-t border-zinc-800/80 pt-3 text-xs text-zinc-500">
+                    <input
+                      type="checkbox"
+                      className="rounded border-zinc-600"
+                      checked={q.isPublic}
+                      onChange={(e) => void patchQ(q.id, e.target.checked)}
+                    />
+                    Community feed
+                  </label>
                 </li>
               ))
             )}

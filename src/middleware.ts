@@ -13,7 +13,7 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
-  const protectedPaths = ["/dashboard", "/applications", "/lab", "/interview", "/companies"];
+  const protectedPaths = ["/dashboard", "/applications", "/lab", "/interview", "/companies", "/profile"];
   const isProtected = protectedPaths.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`)
   );
