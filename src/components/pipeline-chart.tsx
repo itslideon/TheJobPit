@@ -14,8 +14,8 @@ type PipelineChartProps = {
 
 export function PipelineChart({ data }: PipelineChartProps) {
   return (
-    <div className="h-72 w-full rounded-xl border border-red-950 bg-black/70 p-4">
-      <h2 className="mb-3 text-lg font-semibold text-red-100">Pipeline by status</h2>
+    <div className="pit-card-sm h-72 w-full p-4">
+      <h2 className="mb-3 text-lg font-semibold text-zinc-100">Pipeline by status</h2>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie data={data} dataKey="value" nameKey="name" outerRadius={90} label>
@@ -25,10 +25,10 @@ export function PipelineChart({ data }: PipelineChartProps) {
           </Pie>
           <Tooltip
             contentStyle={{
-              background: "#0a0a0a",
-              border: "1px solid #7f1d1d",
+              background: "#18181b",
+              border: "1px solid rgba(45, 212, 191, 0.25)",
               borderRadius: "10px",
-              color: "#fee2e2"
+              color: "#e4e4e7"
             }}
           />
         </PieChart>

@@ -12,6 +12,15 @@ const navItems = [
   { href: "/companies", label: "Companies" }
 ] as const;
 
+const publicNavItems = [
+  { href: "/", label: "Home" },
+  { href: "/about", label: "About" },
+  { href: "/features", label: "Features" },
+  { href: "/faq", label: "FAQ" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/terms", label: "Terms" }
+] as const;
+
 export function SiteHeader() {
   const pathname = usePathname();
   const { status } = useSession();
@@ -22,11 +31,11 @@ export function SiteHeader() {
       : pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-red-950/80 bg-black/90 shadow-[0_4px_24px_rgba(0,0,0,0.45)] backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-zinc-800/80 bg-zinc-950/85 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <Link
           href="/"
-          className="shrink-0 text-lg font-bold tracking-tight text-red-100 transition hover:text-red-50"
+          className="pit-logo-shimmer shrink-0 text-lg font-bold tracking-tight transition hover:opacity-95"
         >
           The Job Pit
         </Link>
@@ -38,10 +47,10 @@ export function SiteHeader() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`rounded-md px-3 py-2 text-sm font-medium transition ${
+                    className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
                       isActive(item.href)
-                        ? "bg-red-950/70 text-red-50 ring-1 ring-red-800/80"
-                        : "text-red-200/90 hover:bg-red-950/40 hover:text-red-50"
+                        ? "bg-rose-500/15 text-rose-50 ring-1 ring-rose-400/25"
+                        : "text-zinc-400 hover:bg-zinc-800/70 hover:text-zinc-100"
                     }`}
                   >
                     {item.label}
@@ -51,22 +60,37 @@ export function SiteHeader() {
               <button
                 type="button"
                 onClick={() => void signOut({ callbackUrl: "/" })}
-                className="rounded-md border border-red-800 px-3 py-2 text-sm font-medium text-red-300/90 hover:bg-red-950/40 hover:text-red-50"
+                className="rounded-lg border border-zinc-600 px-3 py-2 text-sm font-medium text-zinc-400 transition hover:border-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-200"
               >
                 Log out
               </button>
             </>
           ) : (
             <>
+              <nav aria-label="Public" className="flex flex-wrap items-center gap-1 sm:gap-2">
+                {publicNavItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
+                      isActive(item.href)
+                        ? "bg-teal-500/15 text-teal-100 ring-1 ring-teal-400/25"
+                        : "text-zinc-400 hover:bg-zinc-800/70 hover:text-zinc-100"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
               <Link
                 href="/login"
-                className="rounded-md px-3 py-2 text-sm font-medium text-red-200/90 hover:bg-red-950/40 hover:text-red-50"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-400 transition hover:bg-zinc-800/70 hover:text-zinc-100"
               >
                 Log in
               </Link>
               <Link
                 href="/signup"
-                className="rounded-md bg-red-700 px-3 py-2 text-sm font-medium text-white hover:bg-red-600"
+                className="rounded-lg bg-gradient-to-r from-rose-600 to-rose-500 px-3 py-2 text-sm font-semibold text-white shadow-md shadow-rose-950/40 transition hover:from-rose-500 hover:to-rose-400"
               >
                 Sign up
               </Link>

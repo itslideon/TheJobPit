@@ -6,6 +6,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   providers: [
     Credentials({
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
       async authorize(credentials) {
         const schema = z.object({
           email: z.string().email(),
@@ -17,15 +21,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         const { prisma } = await import("@/lib/prisma");
-        const bcrypt = await import("bcryptjs");
+        const { verifyPassword } = await import("@/lib/password");
 
         const email = parsed.data.email.toLowerCase().trim();
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await prisma.user.findFirst({
+          where: {
+            email: { equals: email, mode: "insensitive" }
+          }
+        });
         if (!user) {
           return null;
         }
 
-        const match = await bcrypt.compare(parsed.data.password, user.passwordHash);
+        const match = await verifyPassword(parsed.data.password, user.passwordHash);
         if (!match) {
           return null;
         }

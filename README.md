@@ -7,6 +7,7 @@ managing deadlines/follow-ups, and visualizing your pipeline.
 
 - Lideon
 - Vicknesh
+- Aaron
 
 ## Why this project
 

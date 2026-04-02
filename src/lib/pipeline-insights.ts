@@ -1,10 +1,11 @@
+/** Distinct, accessible hues: rose primary, teal/amber complements, stone for terminal states */
 export const PIPELINE_STATUS_CONFIG = {
-  WISHLIST: { label: "Wishlist", color: "#ef4444" },
-  APPLIED: { label: "Applied", color: "#dc2626" },
-  INTERVIEW: { label: "Interview", color: "#b91c1c" },
-  OFFER: { label: "Offer", color: "#f87171" },
-  REJECTED: { label: "Rejected", color: "#7f1d1d" },
-  WITHDRAWN: { label: "Withdrawn", color: "#991b1b" }
+  WISHLIST: { label: "Wishlist", color: "#f43f5e" },
+  APPLIED: { label: "Applied", color: "#fb7185" },
+  INTERVIEW: { label: "Interview", color: "#2dd4bf" },
+  OFFER: { label: "Offer", color: "#fbbf24" },
+  REJECTED: { label: "Rejected", color: "#78716c" },
+  WITHDRAWN: { label: "Withdrawn", color: "#a8a29e" }
 } as const;
 
 export type ApplicationRow = {

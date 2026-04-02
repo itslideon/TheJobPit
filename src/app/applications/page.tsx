@@ -215,33 +215,30 @@ export default function ApplicationsPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-6 py-10">
-      <header className="rounded-2xl border border-red-950 bg-black/70 p-6 shadow-[0_0_40px_rgba(220,38,38,0.12)]">
-        <h1 className="text-3xl font-bold text-red-100">Applications</h1>
-        <p className="mt-2 text-sm text-red-200/80">
+      <header className="pit-card p-6 shadow-pit">
+        <h1 className="text-3xl font-bold text-zinc-50">Applications</h1>
+        <p className="mt-2 text-sm text-zinc-400">
           Create, monitor, and update every job application in one place.
         </p>
       </header>
 
       <section className="grid gap-6 lg:grid-cols-[360px_1fr]">
-        <form
-          className="rounded-2xl border border-red-950 bg-black/70 p-5"
-          onSubmit={handleCreateApplication}
-        >
-          <h2 className="mb-4 text-lg font-semibold text-red-100">Add application</h2>
+        <form className="pit-card p-5" onSubmit={handleCreateApplication}>
+          <h2 className="mb-4 text-lg font-semibold text-zinc-100">Add application</h2>
           <div className="space-y-3">
             <input
               required
-              className="w-full rounded-md border border-red-900 bg-black/80 px-3 py-2 text-sm text-red-50 outline-none ring-red-700 placeholder:text-red-300/50 focus:ring-2"
+              className="pit-input"
               placeholder="Company"
               value={formState.company}
               onChange={(event) =>
                 setFormState((current) => ({ ...current, company: event.target.value }))
               }
             />
-            <label className="block text-xs text-red-200/70">
+            <label className="pit-label">
               Role
               <select
-                className="mt-1 w-full rounded-md border border-red-900 bg-black/80 px-3 py-2 text-sm text-red-50 outline-none ring-red-700 focus:ring-2"
+                className="pit-input mt-1"
                 value={formState.roleSelect}
                 onChange={(event) =>
                   setFormState((current) => ({
@@ -262,7 +259,7 @@ export default function ApplicationsPage() {
             {formState.roleSelect === ROLE_OTHER ? (
               <input
                 required
-                className="w-full rounded-md border border-red-900 bg-black/80 px-3 py-2 text-sm text-red-50 outline-none ring-red-700 placeholder:text-red-300/50 focus:ring-2"
+                className="pit-input"
                 placeholder="Type your role title"
                 value={formState.customRole}
                 onChange={(event) =>
@@ -271,7 +268,7 @@ export default function ApplicationsPage() {
               />
             ) : null}
             <input
-              className="w-full rounded-md border border-red-900 bg-black/80 px-3 py-2 text-sm text-red-50 outline-none ring-red-700 placeholder:text-red-300/50 focus:ring-2"
+              className="pit-input"
               placeholder="Location (optional)"
               value={formState.location}
               onChange={(event) =>
@@ -279,7 +276,7 @@ export default function ApplicationsPage() {
               }
             />
             <input
-              className="w-full rounded-md border border-red-900 bg-black/80 px-3 py-2 text-sm text-red-50 outline-none ring-red-700 placeholder:text-red-300/50 focus:ring-2"
+              className="pit-input"
               placeholder="Source URL (optional)"
               value={formState.sourceUrl}
               onChange={(event) =>
@@ -287,7 +284,7 @@ export default function ApplicationsPage() {
               }
             />
             <select
-              className="w-full rounded-md border border-red-900 bg-black/80 px-3 py-2 text-sm text-red-50 outline-none ring-red-700 focus:ring-2"
+              className="pit-input"
               value={formState.status}
               onChange={(event) => {
                 const next = event.target.value as ApplicationStatus;
@@ -307,40 +304,40 @@ export default function ApplicationsPage() {
               ))}
             </select>
             {formState.status === "WISHLIST" ? (
-              <p className="text-xs text-red-300/60">
+              <p className="text-xs text-zinc-500">
                 Wishlist is for roles you’re interested in before you apply. Date fields appear
                 once you change status to Applied or later.
               </p>
             ) : null}
             {formState.status !== "WISHLIST" ? (
               <>
-                <label className="block text-xs text-red-200/70">
+                <label className="pit-label">
                   Applied date
                   <input
                     type="date"
-                    className="mt-1 w-full rounded-md border border-red-900 bg-black/80 px-3 py-2 text-sm text-red-50 outline-none ring-red-700 focus:ring-2"
+                    className="pit-input mt-1"
                     value={formState.appliedAt}
                     onChange={(event) =>
                       setFormState((current) => ({ ...current, appliedAt: event.target.value }))
                     }
                   />
                 </label>
-                <label className="block text-xs text-red-200/70">
+                <label className="pit-label">
                   Deadline date
                   <input
                     type="date"
-                    className="mt-1 w-full rounded-md border border-red-900 bg-black/80 px-3 py-2 text-sm text-red-50 outline-none ring-red-700 focus:ring-2"
+                    className="pit-input mt-1"
                     value={formState.deadlineAt}
                     onChange={(event) =>
                       setFormState((current) => ({ ...current, deadlineAt: event.target.value }))
                     }
                   />
                 </label>
-                <label className="block text-xs text-red-200/70">
+                <label className="pit-label">
                   Follow-up date
                   <input
                     type="date"
-                    className="mt-1 w-full rounded-md border border-red-900 bg-black/80 px-3 py-2 text-sm text-red-50 outline-none ring-red-700 focus:ring-2"
+                    className="pit-input mt-1"
                     value={formState.followUpAt}
                     onChange={(event) =>
                       setFormState((current) => ({ ...current, followUpAt: event.target.value }))
@@ -350,7 +347,7 @@ export default function ApplicationsPage() {
               </>
             ) : null}
             <textarea
-              className="h-28 w-full rounded-md border border-red-900 bg-black/80 px-3 py-2 text-sm text-red-50 outline-none ring-red-700 placeholder:text-red-300/50 focus:ring-2"
+              className="pit-input h-28"
               placeholder="Notes"
               value={formState.notes}
               onChange={(event) =>
@@ -362,17 +359,17 @@ export default function ApplicationsPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="mt-4 w-full rounded-md bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:bg-red-900"
+            className="pit-btn-primary mt-4 w-full disabled:bg-zinc-800"
           >
             {isSubmitting ? "Adding..." : "Add application"}
           </button>
         </form>
 
-        <section className="rounded-2xl border border-red-950 bg-black/70 p-5">
+        <section className="pit-card p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-red-100">Application list</h2>
+            <h2 className="text-lg font-semibold text-zinc-100">Application list</h2>
             <button
-              className="rounded-md border border-red-800 px-3 py-1 text-xs font-medium text-red-200 hover:bg-red-950/40"
+              className="pit-btn-secondary px-3 py-1 text-xs"
               onClick={() => void loadApplications()}
               type="button"
             >
@@ -381,22 +378,22 @@ export default function ApplicationsPage() {
           </div>
 
           {feedback ? (
-            <p className="mb-3 rounded-md border border-red-900 bg-red-950/40 px-3 py-2 text-sm text-red-200">
+            <p className="mb-3 rounded-lg border border-rose-900/40 bg-rose-950/20 px-3 py-2 text-sm text-rose-100/90">
               {feedback}
             </p>
           ) : null}
 
           {isLoading ? (
-            <p className="text-sm text-red-200/80">Loading applications...</p>
+            <p className="text-sm text-zinc-500">Loading applications...</p>
           ) : sortedApplications.length === 0 ? (
-            <p className="text-sm text-red-200/80">
+            <p className="text-sm text-zinc-500">
               No applications yet. Add your first one from the form.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-red-900 text-xs uppercase tracking-wide text-red-300/80">
+                  <tr className="border-b border-zinc-800 text-xs uppercase tracking-wide text-zinc-500">
                     <th className="pb-2 pr-4">Company</th>
                     <th className="pb-2 pr-4">Role</th>
                     <th className="pb-2 pr-4">Status</th>
@@ -408,12 +405,12 @@ export default function ApplicationsPage() {
                 </thead>
                 <tbody>
                   {sortedApplications.map((application) => (
-                    <tr key={application.id} className="border-b border-red-950/80 text-red-100">
+                    <tr key={application.id} className="border-b border-zinc-800/80 text-zinc-200">
                       <td className="py-3 pr-4 font-medium">{application.company}</td>
                       <td className="py-3 pr-4">{application.role}</td>
                       <td className="py-3 pr-4">
                         <select
-                          className="rounded-md border border-red-900 bg-black/80 px-2 py-1 text-xs text-red-50 outline-none ring-red-700 focus:ring-2"
+                          className="pit-input max-w-[160px] px-2 py-1 text-xs"
                           value={application.status}
                           onChange={(event) =>
                             void updateStatus(
@@ -435,7 +432,7 @@ export default function ApplicationsPage() {
                       <td className="py-3">
                         <button
                           type="button"
-                          className="rounded-md border border-red-700 px-2 py-1 text-xs text-red-200 hover:bg-red-950/50"
+                          className="pit-btn-danger"
                           onClick={() => void deleteApplication(application.id)}
                         >
                           Delete

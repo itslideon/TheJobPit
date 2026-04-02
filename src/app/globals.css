@@ -4,14 +4,124 @@
 
 :root {
   color-scheme: dark;
+  --pit-bg-deep: #060608;
+  --pit-glow-rose: rgba(225, 29, 72, 0.12);
+  --pit-glow-teal: rgba(20, 184, 166, 0.08);
+  --pit-glow-amber: rgba(245, 158, 11, 0.06);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at top, rgba(153, 27, 27, 0.25), transparent 42%),
-    radial-gradient(circle at bottom right, rgba(127, 29, 29, 0.2), transparent 40%),
-    #050505;
-  color: #fee2e2;
+    radial-gradient(ellipse 120% 80% at 50% -20%, var(--pit-glow-rose), transparent 50%),
+    radial-gradient(ellipse 60% 50% at 100% 0%, var(--pit-glow-teal), transparent 45%),
+    radial-gradient(ellipse 50% 40% at 0% 100%, var(--pit-glow-amber), transparent 40%),
+    linear-gradient(180deg, #0c0c0f 0%, var(--pit-bg-deep) 35%, #050506 100%);
+  color: #d4d4d8;
+}
+
+@keyframes pit-logo-shimmer {
+  0% {
+    background-position: 220% 50%;
+  }
+  100% {
+    background-position: -220% 50%;
+  }
+}
+
+@layer components {
+  /* Surfaces — zinc base + subtle warmth, rose/teal only as accents elsewhere */
+  .pit-card {
+    @apply rounded-2xl border border-zinc-800/70 bg-zinc-900/45 backdrop-blur-md shadow-xl shadow-black/30;
+  }
+
+  .pit-card-sm {
+    @apply rounded-xl border border-zinc-800/70 bg-zinc-900/45 backdrop-blur-sm;
+  }
+
+  .pit-input {
+    @apply w-full rounded-lg border border-zinc-700/80 bg-zinc-950/60 px-3 py-2 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-500 focus:border-teal-500/45 focus:ring-2 focus:ring-teal-500/15;
+  }
+
+  .pit-label {
+    @apply block text-xs font-medium text-zinc-500;
+  }
+
+  .pit-btn-primary {
+    @apply rounded-lg bg-gradient-to-r from-rose-600 to-rose-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-950/35 transition hover:from-rose-500 hover:to-rose-400 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .pit-btn-secondary {
+    @apply rounded-lg border border-zinc-600 bg-zinc-900/30 px-4 py-2 text-sm font-medium text-zinc-200 transition hover:border-teal-500/35 hover:bg-zinc-800/60 hover:text-zinc-50;
+  }
+
+  .pit-btn-danger {
+    @apply rounded-md border border-rose-800/80 bg-transparent px-2 py-1 text-xs font-medium text-rose-300/90 transition hover:bg-rose-950/40 hover:text-rose-200;
+  }
+
+  .pit-link {
+    @apply font-medium text-teal-400/95 underline decoration-teal-500/40 underline-offset-2 transition hover:text-teal-300;
+  }
+
+  /* Marketing / legal pages — navigation & readable body */
+  .pit-nav-back {
+    @apply inline-flex max-w-fit items-center gap-3 rounded-xl border border-zinc-700/60 bg-zinc-900/50 px-3 py-2 text-sm font-medium text-zinc-300 shadow-sm shadow-black/20 transition hover:border-teal-500/35 hover:bg-zinc-800/55 hover:text-zinc-50;
+  }
+
+  .pit-marketing-eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.22em] text-teal-500/90;
+  }
+
+  .pit-marketing-title {
+    @apply bg-gradient-to-br from-zinc-50 via-zinc-100 to-zinc-400 bg-clip-text text-3xl font-bold tracking-tight text-transparent md:text-4xl;
+  }
+
+  .pit-marketing-lead {
+    @apply text-base leading-relaxed text-zinc-400;
+  }
+
+  .pit-marketing-prose {
+    @apply text-[15px] leading-relaxed text-zinc-300;
+  }
+
+  .pit-marketing-prose a {
+    @apply font-medium text-teal-400 underline decoration-teal-500/35 underline-offset-[3px] transition hover:text-teal-300 hover:decoration-teal-400/60;
+  }
+
+  .pit-marketing-card {
+    @apply relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-6 backdrop-blur-sm transition hover:border-zinc-700/90 hover:shadow-lg hover:shadow-black/25;
+  }
+
+  .pit-marketing-card::before {
+    content: "";
+    @apply pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-teal-500/35 to-transparent opacity-80;
+  }
+
+  .pit-logo-shimmer {
+    background-image: linear-gradient(
+      110deg,
+      rgba(255, 255, 255, 0.88) 0%,
+      rgba(255, 255, 255, 0.88) 32%,
+      rgba(255, 255, 255, 0.98) 44%,
+      rgba(255, 255, 255, 0.48) 50%,
+      rgba(255, 255, 255, 0.98) 56%,
+      rgba(255, 255, 255, 0.88) 68%,
+      rgba(255, 255, 255, 0.88) 100%
+    );
+    background-size: 230% 100%;
+    background-repeat: no-repeat;
+    animation: pit-logo-shimmer 3.4s linear infinite;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.18);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pit-logo-shimmer {
+    animation: none;
+    background-position: 50% 50%;
+  }
 }

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "db:generate": "node scripts/db-generate.mjs",
     "db:push": "prisma db push",
     "db:studio": "prisma studio"
   },

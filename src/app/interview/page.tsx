@@ -180,18 +180,18 @@ export default function InterviewPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-10">
-      <header className="rounded-2xl border border-red-950 bg-black/70 p-6 shadow-[0_0_40px_rgba(220,38,38,0.1)]">
-        <h1 className="text-3xl font-bold text-red-100">Interview Prep Hub</h1>
-        <p className="mt-2 text-sm text-red-200/75">
+      <header className="pit-card p-6 shadow-pit">
+        <h1 className="text-3xl font-bold text-zinc-50">Interview Prep Hub</h1>
+        <p className="mt-2 text-sm text-zinc-400">
           Build STAR stories, collect questions and answers, and log mock interview sessions.
         </p>
       </header>
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        <label className="text-xs text-red-300/70">
+        <label className="text-xs text-zinc-500">
           Filter by application (optional)
           <select
-            className="ml-2 rounded-md border border-red-900 bg-black/80 px-2 py-1 text-sm text-red-50"
+            className="pit-input ml-2 inline-block w-auto py-1 text-sm"
             value={filterApp}
             onChange={(e) => setFilterApp(e.target.value)}
           >
@@ -203,10 +203,10 @@ export default function InterviewPage() {
             ))}
           </select>
         </label>
-        {loading ? <span className="text-xs text-red-400/60">Loading…</span> : null}
+        {loading ? <span className="text-xs text-zinc-600">Loading…</span> : null}
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2 border-b border-red-950 pb-2">
+      <div className="mt-4 flex flex-wrap gap-2 border-b border-zinc-800 pb-2">
         {tabs.map((t) => (
           <button
             key={t.id}
@@ -214,8 +214,8 @@ export default function InterviewPage() {
             onClick={() => setTab(t.id)}
             className={`rounded-md px-4 py-2 text-sm font-medium ${
               tab === t.id
-                ? "bg-red-950/80 text-red-50 ring-1 ring-red-800"
-                : "text-red-300/80 hover:bg-red-950/40"
+                ? "bg-rose-500/15 text-zinc-50 ring-1 ring-rose-400/30"
+                : "text-zinc-500 hover:bg-zinc-800/70"
             }`}
           >
             {t.label}
@@ -225,16 +225,16 @@ export default function InterviewPage() {
 
       {tab === "star" ? (
         <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr]">
-          <form className="space-y-2 rounded-2xl border border-red-950 bg-black/70 p-5" onSubmit={addStar}>
-            <h2 className="text-lg font-semibold text-red-100">New STAR story</h2>
-            <p className="text-xs text-red-300/60">
+          <form className="space-y-2 pit-card p-5" onSubmit={addStar}>
+            <h2 className="text-lg font-semibold text-zinc-100">New STAR story</h2>
+            <p className="text-xs text-zinc-500">
               {filterApp
                 ? "Linked to the selected application filter."
                 : "Saved as general (no application). Use filter above to link."}
             </p>
             <input
               required
-              className="w-full rounded border border-red-900 bg-black/80 px-2 py-1.5 text-sm text-red-50"
+              className="pit-input py-1.5"
               placeholder="Title"
               value={starForm.title}
               onChange={(e) => setStarForm((s) => ({ ...s, title: e.target.value }))}
@@ -243,7 +243,7 @@ export default function InterviewPage() {
               <textarea
                 key={field}
                 required
-                className="h-20 w-full rounded border border-red-900 bg-black/80 px-2 py-1 text-xs text-red-50"
+                className="pit-input h-20 text-xs"
                 placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
                 value={starForm[field]}
                 onChange={(e) =>
@@ -253,31 +253,31 @@ export default function InterviewPage() {
             ))}
             <button
               type="submit"
-              className="w-full rounded-md bg-red-700 py-2 text-sm font-semibold text-white hover:bg-red-600"
+              className="pit-btn-primary w-full"
             >
               Add STAR story
             </button>
           </form>
           <ul className="space-y-3">
             {stars.length === 0 ? (
-              <li className="text-sm text-red-300/70">No STAR stories yet.</li>
+              <li className="text-sm text-zinc-500">No STAR stories yet.</li>
             ) : (
               stars.map((s) => (
                 <li
                   key={s.id}
-                  className="rounded-lg border border-red-900/80 bg-black/60 p-3 text-sm text-red-100"
+                  className="rounded-lg border border-zinc-700/60 bg-zinc-950/40 p-3 text-sm text-zinc-100"
                 >
                   <div className="flex justify-between gap-2">
                     <p className="font-medium">{s.title}</p>
                     <button
                       type="button"
-                      className="text-xs text-red-400 hover:text-red-200"
+                      className="text-xs text-teal-400 hover:text-teal-300"
                       onClick={() => void delStar(s.id)}
                     >
                       Delete
                     </button>
                   </div>
-                  <p className="mt-2 whitespace-pre-wrap text-xs text-red-200/75">
+                  <p className="mt-2 whitespace-pre-wrap text-xs text-zinc-400">
                     <strong>S:</strong> {s.situation}
                     {"\n"}
                     <strong>T:</strong> {s.task}
@@ -295,58 +295,58 @@ export default function InterviewPage() {
 
       {tab === "questions" ? (
         <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr]">
-          <form className="space-y-2 rounded-2xl border border-red-950 bg-black/70 p-5" onSubmit={addQ}>
-            <h2 className="text-lg font-semibold text-red-100">Add question</h2>
+          <form className="space-y-2 pit-card p-5" onSubmit={addQ}>
+            <h2 className="text-lg font-semibold text-zinc-100">Add question</h2>
             <input
-              className="w-full rounded border border-red-900 bg-black/80 px-2 py-1.5 text-sm text-red-50"
+              className="pit-input py-1.5"
               placeholder="Category (optional)"
               value={qForm.category}
               onChange={(e) => setQForm((q) => ({ ...q, category: e.target.value }))}
             />
             <textarea
               required
-              className="h-24 w-full rounded border border-red-900 bg-black/80 px-2 py-1 text-sm text-red-50"
+              className="pit-input h-24"
               placeholder="Question"
               value={qForm.question}
               onChange={(e) => setQForm((q) => ({ ...q, question: e.target.value }))}
             />
             <textarea
-              className="h-24 w-full rounded border border-red-900 bg-black/80 px-2 py-1 text-sm text-red-50"
+              className="pit-input h-24"
               placeholder="Your answer (optional)"
               value={qForm.answer}
               onChange={(e) => setQForm((q) => ({ ...q, answer: e.target.value }))}
             />
             <button
               type="submit"
-              className="w-full rounded-md bg-red-700 py-2 text-sm font-semibold text-white hover:bg-red-600"
+              className="pit-btn-primary w-full"
             >
               Save question
             </button>
           </form>
           <ul className="space-y-3">
             {questions.length === 0 ? (
-              <li className="text-sm text-red-300/70">No questions yet.</li>
+              <li className="text-sm text-zinc-500">No questions yet.</li>
             ) : (
               questions.map((q) => (
                 <li
                   key={q.id}
-                  className="rounded-lg border border-red-900/80 bg-black/60 p-3 text-sm"
+                  className="rounded-lg border border-zinc-700/60 bg-zinc-950/40 p-3 text-sm"
                 >
                   <div className="flex justify-between gap-2">
-                    <span className="text-xs text-red-400/80">
+                    <span className="text-xs text-zinc-500">
                       {q.category || "General"}
                     </span>
                     <button
                       type="button"
-                      className="text-xs text-red-400 hover:text-red-200"
+                      className="text-xs text-teal-400 hover:text-teal-300"
                       onClick={() => void delQ(q.id)}
                     >
                       Delete
                     </button>
                   </div>
-                  <p className="mt-1 font-medium text-red-100">{q.question}</p>
+                  <p className="mt-1 font-medium text-zinc-100">{q.question}</p>
                   {q.answer ? (
-                    <p className="mt-2 whitespace-pre-wrap text-xs text-red-200/75">{q.answer}</p>
+                    <p className="mt-2 whitespace-pre-wrap text-xs text-zinc-400">{q.answer}</p>
                   ) : null}
                 </li>
               ))
@@ -357,11 +357,11 @@ export default function InterviewPage() {
 
       {tab === "mock" ? (
         <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr]">
-          <form className="space-y-2 rounded-2xl border border-red-950 bg-black/70 p-5" onSubmit={addMock}>
-            <h2 className="text-lg font-semibold text-red-100">Log mock session</h2>
+          <form className="space-y-2 pit-card p-5" onSubmit={addMock}>
+            <h2 className="text-lg font-semibold text-zinc-100">Log mock session</h2>
             <select
               required
-              className="w-full rounded border border-red-900 bg-black/80 px-2 py-1.5 text-sm text-red-50"
+              className="pit-input py-1.5"
               value={mockForm.applicationId}
               onChange={(e) =>
                 setMockForm((m) => ({ ...m, applicationId: e.target.value }))
@@ -374,11 +374,11 @@ export default function InterviewPage() {
                 </option>
               ))}
             </select>
-            <label className="block text-xs text-red-300/70">
+            <label className="block text-xs text-zinc-500">
               Date (optional)
               <input
                 type="datetime-local"
-                className="mt-1 w-full rounded border border-red-900 bg-black/80 px-2 py-1 text-sm text-red-50"
+                className="pit-input mt-1"
                 value={mockForm.occurredAt}
                 onChange={(e) =>
                   setMockForm((m) => ({ ...m, occurredAt: e.target.value }))
@@ -387,15 +387,15 @@ export default function InterviewPage() {
             </label>
             <textarea
               required
-              className="h-28 w-full rounded border border-red-900 bg-black/80 px-2 py-1 text-sm text-red-50"
+              className="pit-input h-28"
               placeholder="Notes: what went well, what to improve"
               value={mockForm.notes}
               onChange={(e) => setMockForm((m) => ({ ...m, notes: e.target.value }))}
             />
-            <label className="block text-xs text-red-300/70">
+            <label className="block text-xs text-zinc-500">
               Rating (1–5, optional)
               <select
-                className="mt-1 w-full rounded border border-red-900 bg-black/80 px-2 py-1 text-sm text-red-50"
+                className="pit-input mt-1"
                 value={mockForm.rating}
                 onChange={(e) =>
                   setMockForm((m) => ({
@@ -414,22 +414,22 @@ export default function InterviewPage() {
             </label>
             <button
               type="submit"
-              className="w-full rounded-md bg-red-700 py-2 text-sm font-semibold text-white hover:bg-red-600"
+              className="pit-btn-primary w-full"
             >
               Save session
             </button>
           </form>
           <ul className="space-y-3">
             {mocks.length === 0 ? (
-              <li className="text-sm text-red-300/70">No mock sessions yet.</li>
+              <li className="text-sm text-zinc-500">No mock sessions yet.</li>
             ) : (
               mocks.map((m) => (
                 <li
                   key={m.id}
-                  className="rounded-lg border border-red-900/80 bg-black/60 p-3 text-sm text-red-100"
+                  className="rounded-lg border border-zinc-700/60 bg-zinc-950/40 p-3 text-sm text-zinc-100"
                 >
                   <div className="flex justify-between gap-2">
-                    <span className="text-xs text-red-400/80">
+                    <span className="text-xs text-zinc-500">
                       {m.occurredAt
                         ? new Date(m.occurredAt).toLocaleString()
                         : "No date"}
@@ -437,13 +437,13 @@ export default function InterviewPage() {
                     </span>
                     <button
                       type="button"
-                      className="text-xs text-red-400 hover:text-red-200"
+                      className="text-xs text-teal-400 hover:text-teal-300"
                       onClick={() => void delMock(m.id)}
                     >
                       Delete
                     </button>
                   </div>
-                  <p className="mt-2 whitespace-pre-wrap text-xs text-red-200/80">{m.notes}</p>
+                  <p className="mt-2 whitespace-pre-wrap text-xs text-zinc-400">{m.notes}</p>
                 </li>
               ))
             )}

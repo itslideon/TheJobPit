@@ -17,83 +17,94 @@ export function LandingPage({ preview }: LandingPageProps) {
 
   return (
     <main className="mx-auto flex min-h-[calc(100vh-8rem)] max-w-5xl flex-col justify-center gap-12 px-6 py-16">
-      <div className="rounded-2xl border border-red-950/80 bg-black/60 p-8 shadow-[0_0_60px_rgba(220,38,38,0.08)] sm:p-12">
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-red-500/90">
+      <div className="pit-card p-8 shadow-pit sm:p-12">
+        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-teal-500/90">
           Job search workspace
         </p>
-        <h1 className="mt-4 text-4xl font-bold tracking-tight text-red-50 sm:text-5xl">
+        <h1 className="mt-4 bg-gradient-to-br from-zinc-50 via-rose-50 to-teal-100/80 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl">
           The Job Pit
         </h1>
-        <p className="mt-4 max-w-2xl text-lg leading-relaxed text-red-200/85">
+        <p className="mt-4 max-w-2xl text-lg leading-relaxed text-zinc-400">
           Log applications, track every stage, prep interviews, and keep company intel in one
           place — built for your real search, not just a demo.
         </p>
         {loggedIn ? (
-          <p className="mt-3 text-sm text-red-400/90">
+          <p className="mt-3 text-sm text-teal-400/90">
             You&apos;re signed in — your snapshot is below, or jump straight into the app.
           </p>
         ) : null}
-        <ul className="mt-8 space-y-3 text-sm text-red-200/75">
+        <ul className="mt-8 space-y-3 text-sm text-zinc-400">
           <li className="flex gap-2">
-            <span className="text-red-500">▸</span>
+            <span className="text-rose-400" aria-hidden>
+              ▸
+            </span>
             Pipeline dashboard with status analytics
           </li>
           <li className="flex gap-2">
-            <span className="text-red-500">▸</span>
+            <span className="text-teal-400" aria-hidden>
+              ▸
+            </span>
             Resume &amp; cover versions, interview prep, company contacts
           </li>
           <li className="flex gap-2">
-            <span className="text-red-500">▸</span>
-            Black &amp; red UI tuned for long sessions
+            <span className="text-amber-400/90" aria-hidden>
+              ▸
+            </span>
+            Dark UI with rose &amp; teal accents — easy on the eyes for long sessions
           </li>
         </ul>
         <div className="mt-10 flex flex-wrap gap-3">
           {loggedIn ? (
             <>
-              <Link
-                href="/dashboard"
-                className="rounded-lg bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-red-950/40 transition hover:bg-red-500"
-              >
+              <Link href="/dashboard" className="pit-btn-primary px-6 py-3">
                 Open dashboard
               </Link>
-              <Link
-                href="/applications"
-                className="rounded-lg border border-red-800 px-6 py-3 text-sm font-semibold text-red-100 transition hover:bg-red-950/50"
-              >
+              <Link href="/applications" className="pit-btn-secondary px-6 py-3">
                 Manage applications
               </Link>
-              <Link
-                href="/lab"
-                className="rounded-lg border border-red-800 px-6 py-3 text-sm font-semibold text-red-100 transition hover:bg-red-950/50"
-              >
+              <Link href="/lab" className="pit-btn-secondary px-6 py-3">
                 Resume &amp; cover lab
               </Link>
             </>
           ) : (
             <>
-              <Link
-                href="/signup"
-                className="rounded-lg bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-red-950/40 transition hover:bg-red-500"
-              >
+              <Link href="/signup" className="pit-btn-primary px-6 py-3">
                 Create account
               </Link>
-              <Link
-                href="/login"
-                className="rounded-lg border border-red-800 px-6 py-3 text-sm font-semibold text-red-100 transition hover:bg-red-950/50"
-              >
+              <Link href="/login" className="pit-btn-secondary px-6 py-3">
                 Log in
               </Link>
             </>
           )}
         </div>
         {!loggedIn ? (
-          <p className="mt-8 text-xs text-red-400/60">
+          <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-sm text-zinc-500">
+            <span className="text-zinc-600">Explore:</span>
+            <Link className="pit-link" href="/about">
+              About
+            </Link>
+            <Link className="pit-link" href="/features">
+              Features
+            </Link>
+            <Link className="pit-link" href="/faq">
+              FAQ
+            </Link>
+            <Link className="pit-link" href="/privacy">
+              Privacy
+            </Link>
+            <Link className="pit-link" href="/terms">
+              Terms
+            </Link>
+          </div>
+        ) : null}
+        {!loggedIn ? (
+          <p className="mt-8 text-xs text-zinc-600">
             Free for personal use. By continuing you agree to our{" "}
-            <Link className="underline hover:text-red-300" href="/terms">
+            <Link className="pit-link" href="/terms">
               Terms
             </Link>{" "}
             and{" "}
-            <Link className="underline hover:text-red-300" href="/privacy">
+            <Link className="pit-link" href="/privacy">
               Privacy Policy
             </Link>
             .
@@ -103,23 +114,23 @@ export function LandingPage({ preview }: LandingPageProps) {
 
       {loggedIn && preview ? (
         <section className="flex flex-col gap-6" aria-label="Your pipeline preview">
-          <h2 className="text-lg font-semibold text-red-100">Your snapshot</h2>
+          <h2 className="text-lg font-semibold text-zinc-200">Your snapshot</h2>
           <div className="grid gap-4 md:grid-cols-3">
-            <article className="rounded-xl border border-red-950 bg-black/70 p-5">
-              <h3 className="text-sm font-medium text-red-300/70">Total applications</h3>
-              <p className="mt-2 text-3xl font-semibold text-red-100">
+            <article className="pit-card-sm border-l-2 border-l-rose-500/50 p-5">
+              <h3 className="text-sm font-medium text-zinc-500">Total applications</h3>
+              <p className="mt-2 text-3xl font-semibold tabular-nums text-zinc-100">
                 {preview.totalApplications}
               </p>
             </article>
-            <article className="rounded-xl border border-red-950 bg-black/70 p-5">
-              <h3 className="text-sm font-medium text-red-300/70">Active pipeline</h3>
-              <p className="mt-2 text-3xl font-semibold text-red-100">
+            <article className="pit-card-sm border-l-2 border-l-teal-500/50 p-5">
+              <h3 className="text-sm font-medium text-zinc-500">Active pipeline</h3>
+              <p className="mt-2 text-3xl font-semibold tabular-nums text-zinc-100">
                 {preview.activePipeline}
               </p>
             </article>
-            <article className="rounded-xl border border-red-950 bg-black/70 p-5">
-              <h3 className="text-sm font-medium text-red-300/70">Follow ups due</h3>
-              <p className="mt-2 text-3xl font-semibold text-red-100">
+            <article className="pit-card-sm border-l-2 border-l-amber-500/45 p-5">
+              <h3 className="text-sm font-medium text-zinc-500">Follow ups due</h3>
+              <p className="mt-2 text-3xl font-semibold tabular-nums text-zinc-100">
                 {preview.followUpsDue}
               </p>
             </article>
