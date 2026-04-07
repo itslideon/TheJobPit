@@ -54,6 +54,7 @@ Middleware redirects unauthenticated users to `/login?callbackUrl=…` for prote
 - **Password reset** — `POST /api/forgot-password`, `POST /api/reset-password`; email via **Resend** when `RESEND_API_KEY` is set; in development without Resend, the reset URL is printed in the **server terminal**.
 - **Interview prep** — STAR stories, questions, mock notes (session APIs). Users can **share** individual STAR stories or Q&A to `/community` (opt-in flags on each record).
 - **Community** — Lists only content marked public; author display uses **profile** fields (no email shown).
+- **Polished legal + account UX** — Terms page now uses highlighted section cards; signed-in header uses a profile icon dropdown for account actions.
 
 After pulling schema changes, run `npx prisma db push` and regenerate the client. On **Windows**, if `prisma generate` fails with **EPERM** while the dev server is running, stop `npm run dev`, then run `npm run db:generate` (frees common ports and runs `prisma generate`), then start dev again.
 
