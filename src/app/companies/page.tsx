@@ -25,6 +25,20 @@ type Company = {
   contacts: Contact[];
 };
 
+type OpeningMatch = {
+  id: string;
+  company: string;
+  role: string;
+  jobType: string;
+  location: string;
+  salary: string;
+  url: string;
+  summary: string;
+  source: string;
+  score: number;
+  reasons: string[];
+};
+
 export default function CompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -46,6 +60,19 @@ export default function CompaniesPage() {
     isReferral: false,
     notes: ""
   });
+  const [jobForm, setJobForm] = useState({
+    company: "",
+    role: "",
+    jobType: "",
+    location: "",
+    skills: ""
+  });
+  const [resumeFileName, setResumeFileName] = useState("");
+  const [resumeText, setResumeText] = useState("");
+  const [matches, setMatches] = useState<OpeningMatch[]>([]);
+  const [matchLoading, setMatchLoading] = useState(false);
+  const [matchError, setMatchError] = useState("");
+  const [saveStatus, setSaveStatus] = useState<string>("");
 
   const load = useCallback(async () => {
     const res = await fetch("/api/companies", { cache: "no-store" });
@@ -135,14 +162,210 @@ export default function CompaniesPage() {
     await load();
   }
 
+  async function onResumeFile(file: File | null) {
+    setResumeFileName(file?.name ?? "");
+    if (!file) {
+      setResumeText("");
+      return;
+    }
+    try {
+      const text = await file.text();
+      const cleaned = text.replace(/\s+/g, " ").trim().slice(0, 100_000);
+      setResumeText(cleaned);
+    } catch {
+      setResumeText("");
+    }
+  }
+
+  async function runMatch(e: FormEvent) {
+    e.preventDefault();
+    setMatchLoading(true);
+    setMatchError("");
+    setSaveStatus("");
+    const skills = jobForm.skills
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const res = await fetch("/api/job-match", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        company: jobForm.company || undefined,
+        role: jobForm.role || undefined,
+        jobType: jobForm.jobType || undefined,
+        location: jobForm.location || undefined,
+        skills: skills.length ? skills : undefined,
+        resumeText: resumeText || undefined
+      })
+    });
+    const body = (await res.json().catch(() => ({}))) as {
+      error?: string;
+      data?: OpeningMatch[];
+    };
+    setMatchLoading(false);
+    if (!res.ok) {
+      setMatchError(body.error ?? "Could not run match.");
+      return;
+    }
+    setMatches(body.data ?? []);
+  }
+
+  async function saveAsApplication(match: OpeningMatch) {
+    setSaveStatus("");
+    const res = await fetch("/api/applications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        company: match.company,
+        role: match.role,
+        location: match.location,
+        sourceUrl: match.url,
+        notes: `Matched by Job Assistant\nScore: ${match.score}%\nType: ${match.jobType}\nSalary: ${match.salary}\n${match.summary}`,
+        status: "WISHLIST"
+      })
+    });
+    if (!res.ok) {
+      setSaveStatus("Could not save match as application.");
+      return;
+    }
+    setSaveStatus(`Saved ${match.company} - ${match.role} to Applications.`);
+  }
+
   return (
     <main className="mx-auto max-w-6xl px-6 py-10">
       <header className="pit-card p-6 shadow-pit">
         <h1 className="text-3xl font-bold text-zinc-50">Company Intel</h1>
         <p className="mt-2 text-sm text-zinc-400">
-          Track companies, salary bands, and contacts or referrals in one place.
+          Enter target roles and preferences (optionally upload resume text) to discover potential
+          openings, then track companies and contacts below.
         </p>
       </header>
+
+      <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_1.2fr]">
+        <form className="pit-card p-5" onSubmit={runMatch}>
+          <h2 className="text-lg font-semibold text-zinc-100">Job Match Assistant</h2>
+          <p className="mt-1 text-xs text-zinc-500">
+            Add company + role preferences, or upload resume content for stronger matching.
+          </p>
+          <div className="mt-4 space-y-2">
+            <input
+              className="pit-input py-1.5"
+              placeholder="Target company (optional)"
+              value={jobForm.company}
+              onChange={(e) => setJobForm((s) => ({ ...s, company: e.target.value }))}
+            />
+            <input
+              className="pit-input py-1.5"
+              placeholder="Target role (e.g. Frontend Engineer)"
+              value={jobForm.role}
+              onChange={(e) => setJobForm((s) => ({ ...s, role: e.target.value }))}
+            />
+            <div className="grid gap-2 sm:grid-cols-2">
+              <input
+                className="pit-input py-1.5"
+                placeholder="Job type (Full-time, Internship...)"
+                value={jobForm.jobType}
+                onChange={(e) => setJobForm((s) => ({ ...s, jobType: e.target.value }))}
+              />
+              <input
+                className="pit-input py-1.5"
+                placeholder="Location (city/remote)"
+                value={jobForm.location}
+                onChange={(e) => setJobForm((s) => ({ ...s, location: e.target.value }))}
+              />
+            </div>
+            <input
+              className="pit-input py-1.5"
+              placeholder="Skills (comma-separated, e.g. react, sql, python)"
+              value={jobForm.skills}
+              onChange={(e) => setJobForm((s) => ({ ...s, skills: e.target.value }))}
+            />
+            <label className="block text-xs text-zinc-500">
+              Resume file (optional; text extraction best for plain text files)
+              <input
+                type="file"
+                className="mt-1 block w-full text-xs text-zinc-400 file:mr-2 file:rounded-md file:border file:border-zinc-700 file:bg-zinc-900 file:px-2 file:py-1 file:text-zinc-300"
+                onChange={(e) => void onResumeFile(e.target.files?.[0] ?? null)}
+              />
+            </label>
+            {resumeFileName ? (
+              <p className="text-xs text-zinc-500">Loaded: {resumeFileName}</p>
+            ) : null}
+            <textarea
+              className="pit-input h-24 text-xs"
+              placeholder="Optional: paste resume text for better matching."
+              value={resumeText}
+              onChange={(e) => setResumeText(e.target.value)}
+            />
+          </div>
+          {matchError ? <p className="mt-3 text-sm text-rose-400">{matchError}</p> : null}
+          <button type="submit" className="pit-btn-primary mt-3 w-full" disabled={matchLoading}>
+            {matchLoading ? "Matching..." : "Find potential openings"}
+          </button>
+        </form>
+
+        <div className="pit-card p-5">
+          <h2 className="text-lg font-semibold text-zinc-100">Match results</h2>
+          <p className="mt-1 text-xs text-zinc-500">
+            Ranked by role/company/preferences + resume/skills overlap.
+          </p>
+          {saveStatus ? <p className="mt-3 text-sm text-teal-300/90">{saveStatus}</p> : null}
+          {matches.length === 0 ? (
+            <p className="mt-5 text-sm text-zinc-500">
+              No matches yet. Run the assistant on the left.
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {matches.map((m) => (
+                <li key={m.id} className="rounded-lg border border-zinc-700/60 bg-zinc-950/40 p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-medium text-zinc-100">
+                        {m.role} - {m.company}
+                      </p>
+                      <p className="text-xs text-zinc-500">
+                        {m.jobType} · {m.location} · {m.salary}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="rounded bg-teal-950/50 px-2 py-0.5 text-xs text-teal-300">
+                        {m.score}% match
+                      </span>
+                      <span className="rounded border border-zinc-700/80 bg-zinc-900/60 px-2 py-0.5 text-[10px] uppercase tracking-wider text-zinc-400">
+                        {m.source}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-sm text-zinc-400">{m.summary}</p>
+                  <ul className="mt-2 space-y-1 text-xs text-zinc-500">
+                    {m.reasons.slice(0, 3).map((r) => (
+                      <li key={r}>- {r}</li>
+                    ))}
+                  </ul>
+                  <div className="mt-3 flex gap-2">
+                    <a
+                      href={m.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="pit-btn-secondary px-3 py-1.5 text-xs"
+                    >
+                      View opening
+                    </a>
+                    <button
+                      type="button"
+                      className="pit-btn-primary px-3 py-1.5 text-xs"
+                      onClick={() => void saveAsApplication(m)}
+                    >
+                      Save to applications
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         <div className="space-y-6">

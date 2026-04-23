@@ -117,7 +117,8 @@ export const updateProfileSchema = z
     linkedinUrl: emptyOrHttpUrl,
     githubUrl: emptyOrHttpUrl,
     twitterUrl: emptyOrHttpUrl,
-    websiteUrl: emptyOrHttpUrl
+    websiteUrl: emptyOrHttpUrl,
+    gamificationEnabled: z.boolean()
   })
   .transform((d) => ({
     name: d.name.trim() === "" ? null : d.name.trim(),
@@ -128,5 +129,6 @@ export const updateProfileSchema = z
     linkedinUrl: d.linkedinUrl === "" ? null : d.linkedinUrl,
     githubUrl: d.githubUrl === "" ? null : d.githubUrl,
     twitterUrl: d.twitterUrl === "" ? null : d.twitterUrl,
-    websiteUrl: d.websiteUrl === "" ? null : d.websiteUrl
+    websiteUrl: d.websiteUrl === "" ? null : d.websiteUrl,
+    gamificationEnabled: d.gamificationEnabled
   }));

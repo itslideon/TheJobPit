@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/session-user";
 import { updateInterviewQuestionSchema } from "@/lib/validation";
+import { awardGamification } from "@/lib/gamification";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -30,6 +31,9 @@ export async function PATCH(request: Request, { params }: Ctx) {
     where: { id },
     data: parsed.data
   });
+  if (!existing.isPublic && data.isPublic) {
+    await awardGamification(userId, "community_share");
+  }
   return NextResponse.json({ data });
 }
 

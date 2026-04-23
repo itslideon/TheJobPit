@@ -55,6 +55,7 @@ Middleware redirects unauthenticated users to `/login?callbackUrl=…` for prote
 - **Interview prep** — STAR stories, questions, mock notes (session APIs). Users can **share** individual STAR stories or Q&A to `/community` (opt-in flags on each record).
 - **Community** — Lists only content marked public; author display uses **profile** fields (no email shown).
 - **Polished legal + account UX** — Terms page now uses highlighted section cards; signed-in header uses a profile icon dropdown for account actions.
+- **Job Match Assistant** (inside `/companies`) — enter target company/role/type/location, optional resume text/upload, and fetch ranked potential openings. Aggregates Singapore-focused sources (MyCareersFuture plus optional LinkedIn SG / Glassdoor SG feeds), with built-in fallback data.
 
 After pulling schema changes, run `npx prisma db push` and regenerate the client. On **Windows**, if `prisma generate` fails with **EPERM** while the dev server is running, stop `npm run dev`, then run `npm run db:generate` (frees common ports and runs `prisma generate`), then start dev again.
 
@@ -83,6 +84,10 @@ Copy `.env.example` to `.env` and set:
 | `AUTH_URL` | App origin, e.g. `http://localhost:3000` |
 | `RESEND_API_KEY` | *(Optional)* Send password-reset emails via [Resend](https://resend.com) |
 | `EMAIL_FROM` | *(Optional)* From address for Resend (must be allowed for your domain) |
+| `JOB_MATCH_USE_LIVE` | *(Optional)* `1` to use live MyCareersFuture source (default), `0` for local sample data only |
+| `MCF_API_URL` | *(Optional)* Override MyCareersFuture endpoint |
+| `LINKEDIN_SG_FEED_URL` | *(Optional)* Your proxy/feed endpoint returning LinkedIn SG jobs in JSON |
+| `GLASSDOOR_SG_FEED_URL` | *(Optional)* Your proxy/feed endpoint returning Glassdoor SG jobs in JSON |
 
 ### Database and Prisma
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/session-user";
 import { createMockInterviewSchema } from "@/lib/validation";
+import { awardGamification } from "@/lib/gamification";
 
 export async function GET(request: Request) {
   const { userId, response } = await requireUserId();
@@ -46,6 +47,8 @@ export async function POST(request: Request) {
       rating: parsed.data.rating ?? null
     }
   });
+
+  await awardGamification(userId, "mock_interview_log");
 
   return NextResponse.json({ data }, { status: 201 });
 }

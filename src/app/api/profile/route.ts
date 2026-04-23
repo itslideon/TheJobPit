@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/session-user";
 import { updateProfileSchema } from "@/lib/validation";
+import { awardGamification } from "@/lib/gamification";
 
 const profileSelect = {
   id: true,
@@ -15,7 +16,12 @@ const profileSelect = {
   githubUrl: true,
   twitterUrl: true,
   websiteUrl: true,
-  updatedAt: true
+  updatedAt: true,
+  gameProfile: {
+    select: {
+      gamificationEnabled: true
+    }
+  }
 } as const;
 
 export async function GET() {
@@ -51,11 +57,23 @@ export async function PATCH(request: Request) {
     );
   }
 
+  const { gamificationEnabled, ...rest } = parsed.data;
+
   const data = await prisma.user.update({
     where: { id: userId },
-    data: parsed.data,
+    data: {
+      ...rest,
+      gameProfile: {
+        upsert: {
+          create: { gamificationEnabled },
+          update: { gamificationEnabled }
+        }
+      }
+    },
     select: profileSelect
   });
+
+  await awardGamification(userId, "profile_update");
 
   return NextResponse.json({ data });
 }

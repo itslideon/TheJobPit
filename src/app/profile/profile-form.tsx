@@ -14,6 +14,7 @@ export type ProfileFormInitial = {
   githubUrl: string | null;
   twitterUrl: string | null;
   websiteUrl: string | null;
+  gamificationEnabled: boolean;
 };
 
 type Props = {
@@ -33,6 +34,7 @@ export function ProfileForm({ email, initial }: Props) {
   const [githubUrl, setGithubUrl] = useState(initial.githubUrl ?? "");
   const [twitterUrl, setTwitterUrl] = useState(initial.twitterUrl ?? "");
   const [websiteUrl, setWebsiteUrl] = useState(initial.websiteUrl ?? "");
+  const [gamificationEnabled, setGamificationEnabled] = useState(initial.gamificationEnabled);
   const [error, setError] = useState("");
   const [ok, setOk] = useState(false);
   const [pending, setPending] = useState(false);
@@ -54,7 +56,8 @@ export function ProfileForm({ email, initial }: Props) {
         linkedinUrl,
         githubUrl,
         twitterUrl,
-        websiteUrl
+        websiteUrl,
+        gamificationEnabled
       })
     });
     const body = (await res.json().catch(() => ({}))) as {
@@ -142,6 +145,24 @@ export function ProfileForm({ email, initial }: Props) {
             />
           </label>
         </div>
+      </section>
+
+      <section className="pit-card p-6 shadow-pit md:p-8">
+        <h2 className="text-lg font-semibold text-zinc-100">Gamification</h2>
+        <p className="mt-1 text-sm text-zinc-500">
+          Turn this on to earn XP, levels, streaks, quests, and badges.
+        </p>
+        <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-lg border border-zinc-800/90 bg-zinc-900/30 p-3">
+          <input
+            type="checkbox"
+            className="mt-1 rounded border-zinc-600"
+            checked={gamificationEnabled}
+            onChange={(e) => setGamificationEnabled(e.target.checked)}
+          />
+          <span className="text-sm text-zinc-300">
+            Enable game mode (Valorant-style progression visuals on Dashboard)
+          </span>
+        </label>
       </section>
 
       <section className="pit-card p-6 shadow-pit md:p-8">

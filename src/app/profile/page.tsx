@@ -28,7 +28,12 @@ export default async function ProfilePage() {
       linkedinUrl: true,
       githubUrl: true,
       twitterUrl: true,
-      websiteUrl: true
+      websiteUrl: true,
+      gameProfile: {
+        select: {
+          gamificationEnabled: true
+        }
+      }
     }
   });
 
@@ -56,7 +61,8 @@ export default async function ProfilePage() {
           linkedinUrl: user.linkedinUrl,
           githubUrl: user.githubUrl,
           twitterUrl: user.twitterUrl,
-          websiteUrl: user.websiteUrl
+          websiteUrl: user.websiteUrl,
+          gamificationEnabled: user.gameProfile?.gamificationEnabled ?? true
         }}
       />
     </main>

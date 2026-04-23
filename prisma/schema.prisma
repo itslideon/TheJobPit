@@ -27,6 +27,47 @@ model User {
   starStories          StarStory[]
   interviewQuestions   InterviewQuestion[]
   passwordResetTokens  PasswordResetToken[]
+  gameProfile          UserGameProfile?
+  gameBadges           UserGameBadge[]
+  gameEvents           GamificationEvent[]
+}
+
+model UserGameProfile {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gamificationEnabled Boolean  @default(true)
+  xp                 Int      @default(0)
+  level              Int      @default(1)
+  streakDays         Int      @default(0)
+  longestStreakDays  Int      @default(0)
+  lastActivityDate   DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model UserGameBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  key       String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, key])
+  @@index([userId, createdAt])
+}
+
+model GamificationEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  title     String
+  detail    String?
+  xpDelta   Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
 }
 
 model PasswordResetToken {

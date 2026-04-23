@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/session-user";
 import { createInterviewQuestionSchema } from "@/lib/validation";
+import { awardGamification } from "@/lib/gamification";
 
 export async function GET(request: Request) {
   const { userId, response } = await requireUserId();
@@ -48,6 +49,11 @@ export async function POST(request: Request) {
       applicationId: applicationId ?? null
     }
   });
+
+  await awardGamification(userId, "interview_question_create");
+  if (data.isPublic) {
+    await awardGamification(userId, "community_share");
+  }
 
   return NextResponse.json({ data }, { status: 201 });
 }
