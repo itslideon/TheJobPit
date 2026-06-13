@@ -45,7 +45,13 @@ type MatchMeta = {
   usedFallback: boolean;
   liveCount: number;
   sourceSummary: string;
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 };
+
+const MATCH_LIMIT = 8;
 
 export default function CompaniesPage() {
   const { readJsonWithReward } = useRewardedFetch();
@@ -80,6 +86,7 @@ export default function CompaniesPage() {
   const [resumeText, setResumeText] = useState("");
   const [matches, setMatches] = useState<OpeningMatch[]>([]);
   const [matchMeta, setMatchMeta] = useState<MatchMeta | null>(null);
+  const [resumeExtracting, setResumeExtracting] = useState(false);
   const [matchLoading, setMatchLoading] = useState(false);
   const [matchError, setMatchError] = useState("");
   const [saveStatus, setSaveStatus] = useState<string>("");
@@ -174,8 +181,34 @@ export default function CompaniesPage() {
 
   async function onResumeFile(file: File | null) {
     setResumeFileName(file?.name ?? "");
+    setMatchError("");
     if (!file) {
       setResumeText("");
+      return;
+    }
+    const lower = file.name.toLowerCase();
+    if (lower.endsWith(".pdf")) {
+      setResumeExtracting(true);
+      try {
+        const fd = new FormData();
+        fd.append("file", file);
+        const res = await fetch("/api/resume/extract", { method: "POST", body: fd });
+        const body = (await res.json().catch(() => ({}))) as {
+          error?: string;
+          data?: { text: string };
+        };
+        if (!res.ok) {
+          setMatchError(body.error ?? "Could not extract PDF text.");
+          setResumeText("");
+          return;
+        }
+        setResumeText(body.data?.text ?? "");
+      } catch {
+        setMatchError("Could not extract PDF text.");
+        setResumeText("");
+      } finally {
+        setResumeExtracting(false);
+      }
       return;
     }
     try {
@@ -187,7 +220,7 @@ export default function CompaniesPage() {
     }
   }
 
-  async function runMatch(e: FormEvent) {
+  async function runMatch(e: FormEvent, page = 1) {
     e.preventDefault();
     setMatchLoading(true);
     setMatchError("");
@@ -207,7 +240,9 @@ export default function CompaniesPage() {
         jobType: jobForm.jobType || undefined,
         location: jobForm.location || undefined,
         skills: skills.length ? skills : undefined,
-        resumeText: resumeText || undefined
+        resumeText: resumeText || undefined,
+        page,
+        limit: MATCH_LIMIT
       })
     });
     const body = (await res.json().catch(() => ({}))) as {
@@ -257,7 +292,7 @@ export default function CompaniesPage() {
       </header>
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_1.2fr]">
-        <form className="pit-card p-5" onSubmit={runMatch}>
+        <form id="job-match-form" className="pit-card p-5" onSubmit={(e) => void runMatch(e, 1)}>
           <h2 className="text-lg font-semibold text-zinc-100">Job Match Assistant</h2>
           <p className="mt-1 text-xs text-zinc-500">
             Add company + role preferences, or upload resume content for stronger matching.
@@ -296,15 +331,19 @@ export default function CompaniesPage() {
               onChange={(e) => setJobForm((s) => ({ ...s, skills: e.target.value }))}
             />
             <label className="block text-xs text-zinc-500">
-              Resume file (optional; text extraction best for plain text files)
+              Resume file (PDF or plain text; PDF text extracted on the server)
               <input
                 type="file"
+                accept=".pdf,.txt,.md,text/plain,application/pdf"
                 className="mt-1 block w-full text-xs text-zinc-400 file:mr-2 file:rounded-md file:border file:border-zinc-700 file:bg-zinc-900 file:px-2 file:py-1 file:text-zinc-300"
                 onChange={(e) => void onResumeFile(e.target.files?.[0] ?? null)}
               />
             </label>
             {resumeFileName ? (
-              <p className="text-xs text-zinc-500">Loaded: {resumeFileName}</p>
+              <p className="text-xs text-zinc-500">
+                Loaded: {resumeFileName}
+                {resumeExtracting ? " · extracting…" : ""}
+              </p>
             ) : null}
             <textarea
               className="pit-input h-24 text-xs"
@@ -314,7 +353,11 @@ export default function CompaniesPage() {
             />
           </div>
           {matchError ? <p className="mt-3 text-sm text-rose-400">{matchError}</p> : null}
-          <button type="submit" className="pit-btn-primary mt-3 w-full" disabled={matchLoading}>
+          <button
+            type="submit"
+            className="pit-btn-primary mt-3 w-full"
+            disabled={matchLoading || resumeExtracting}
+          >
             {matchLoading ? "Matching..." : "Find potential openings"}
           </button>
         </form>
@@ -401,6 +444,36 @@ export default function CompaniesPage() {
               ))}
             </ul>
           )}
+          {matchMeta && matchMeta.totalPages > 1 ? (
+            <div className="mt-4 flex items-center justify-between gap-3 border-t border-zinc-800/80 pt-4">
+              <p className="text-xs text-zinc-500">
+                Page {matchMeta.page} of {matchMeta.totalPages} · {matchMeta.total} matches
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className="pit-btn-secondary px-3 py-1 text-xs disabled:opacity-40"
+                  disabled={matchMeta.page <= 1 || matchLoading}
+                  onClick={() => {
+                    const form = document.getElementById("job-match-form") as HTMLFormElement | null;
+                    if (form) void runMatch({ preventDefault: () => {} } as FormEvent, matchMeta.page - 1);
+                  }}
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  className="pit-btn-secondary px-3 py-1 text-xs disabled:opacity-40"
+                  disabled={matchMeta.page >= matchMeta.totalPages || matchLoading}
+                  onClick={() => {
+                    void runMatch({ preventDefault: () => {} } as FormEvent, matchMeta.page + 1);
+                  }}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          ) : null}
         </div>
       </section>
 

@@ -107,10 +107,8 @@ export function SiteFooter() {
             </nav>
           </FooterColumn>
 
-          <FooterColumn id="footer-creators" title="Creators">
-            <p className="text-[15px] leading-relaxed text-zinc-400 antialiased">
-              Lideon, Vicknesh &amp; Aaron
-            </p>
+          <FooterColumn id="footer-creator" title="Creator">
+            <p className="text-[15px] leading-relaxed text-zinc-400 antialiased">Lideon</p>
           </FooterColumn>
         </div>
 

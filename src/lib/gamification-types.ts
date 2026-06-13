@@ -6,4 +6,6 @@ export type GamificationReward = {
   leveledUp: boolean;
   newBadges: string[];
   xpGain: number;
+  rankName: string;
+  rankIcon: string;
 };

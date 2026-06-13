@@ -187,7 +187,7 @@ function scoreOpenings(input: MatchInput, openings: Opening[]): MatchResult[] {
     return { ...o, score: Math.min(100, score), reasons };
   });
 
-  return scored.sort((a, b) => b.score - a.score).slice(0, 8);
+  return scored.sort((a, b) => b.score - a.score);
 }
 
 type McfHit = {
@@ -433,21 +433,43 @@ async function fetchLiveOpenings(input: MatchInput): Promise<Opening[]> {
   return dedupeOpenings([...mcfOpenings, ...linkedinOpenings, ...glassdoorOpenings]);
 }
 
-export async function matchOpenings(input: MatchInput): Promise<{
+export async function matchOpenings(
+  input: MatchInput,
+  opts?: { page?: number; limit?: number }
+): Promise<{
   matches: MatchResult[];
-  meta: { usedFallback: boolean; liveCount: number; sourceSummary: string };
+  meta: {
+    usedFallback: boolean;
+    liveCount: number;
+    sourceSummary: string;
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }> {
   const live = await fetchLiveOpenings(input);
   const usedFallback = live.length === 0;
   const source = live.length > 0 ? live : FALLBACK_OPENINGS;
-  const matches = scoreOpenings(input, source);
+  const allMatches = scoreOpenings(input, source);
   const sources = [...new Set(source.map((o) => o.source))];
+
+  const limit = Math.min(20, Math.max(1, opts?.limit ?? 8));
+  const totalPages = Math.max(1, Math.ceil(allMatches.length / limit));
+  const page = Math.min(totalPages, Math.max(1, opts?.page ?? 1));
+  const start = (page - 1) * limit;
+  const matches = allMatches.slice(start, start + limit);
+
   return {
     matches,
     meta: {
       usedFallback,
       liveCount: live.length,
-      sourceSummary: usedFallback ? "Sample data (live feeds unavailable)" : sources.join(", ")
+      sourceSummary: usedFallback ? "Sample data (live feeds unavailable)" : sources.join(", "),
+      total: allMatches.length,
+      page,
+      limit,
+      totalPages
     }
   };
 }

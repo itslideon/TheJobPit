@@ -9,7 +9,9 @@ const bodySchema = z.object({
   jobType: z.string().trim().max(80).optional(),
   location: z.string().trim().max(120).optional(),
   skills: z.array(z.string().trim().max(60)).max(40).optional(),
-  resumeText: z.string().max(120_000).optional()
+  resumeText: z.string().max(120_000).optional(),
+  page: z.number().int().min(1).max(50).optional(),
+  limit: z.number().int().min(1).max(20).optional()
 });
 
 export async function POST(request: Request) {
@@ -31,6 +33,9 @@ export async function POST(request: Request) {
     );
   }
 
-  const { matches, meta } = await matchOpenings(parsed.data);
+  const { matches, meta } = await matchOpenings(parsed.data, {
+    page: parsed.data.page,
+    limit: parsed.data.limit
+  });
   return NextResponse.json({ data: matches, meta });
 }

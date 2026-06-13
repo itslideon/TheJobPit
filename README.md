@@ -4,11 +4,9 @@ A full-stack job application tracker for logging opportunities, monitoring statu
 managing deadlines and follow-ups, and visualizing your pipeline — with optional **community**
 sharing for STAR stories and interview Q&A.
 
-## Creators
+## Creator
 
 - Lideon
-- Vicknesh
-- Aaron
 
 ## Why this project
 
@@ -43,7 +41,7 @@ This app is both practical for your own search and a strong portfolio piece beca
 | `/login`, `/signup`, `/forgot-password`, `/reset-password` | Auth flows |
 | `/privacy`, `/terms` | Legal |
 
-Signed-in users get a **header account menu** (profile icon): Profile, Community, Log out.
+Signed-in users get a **header account menu** (profile icon): Profile, Community, Log out. Admin users also see **Admin** (links to `/admin`).
 
 Middleware redirects unauthenticated users to `/login?callbackUrl=…` for protected paths (`/dashboard`, `/applications`, `/lab`, `/interview`, `/companies`, `/profile`, `/admin`). `/community` stays **public** (read-only browsing).
 
@@ -58,10 +56,11 @@ Admin access: set `ADMIN_EMAILS` in `.env` (comma-separated). Those users are pr
 - **Interview prep** — STAR stories, questions, mock notes (session APIs). Users can **share** individual STAR stories or Q&A to `/community` (opt-in flags on each record).
 - **Community** — Lists only content marked public; author display uses **profile** fields (no email shown).
 - **Polished legal + account UX** — Terms page now uses highlighted section cards; signed-in header uses a profile icon dropdown for account actions.
-- **Job Match Assistant** (inside `/companies`) — enter target company/role/type/location, optional resume text/upload, and fetch ranked potential openings. Aggregates Singapore-focused sources (MyCareersFuture plus optional LinkedIn SG / Glassdoor SG feeds), with built-in fallback data and live/sample indicators on results.
-- **Gamification** — XP, levels, streaks, badges, daily quests on the dashboard. Mutating actions show **XP toasts** when game mode is enabled in profile.
-- **Admin console** — `/admin` overview stats, user list (`/admin/users`), and community moderation (`/admin/community` hide public posts).
+- **Job Match Assistant** (inside `/companies`) — enter target company/role/type/location, optional resume text/upload, and fetch ranked potential openings. Aggregates Singapore-focused sources (MyCareersFuture plus optional LinkedIn SG / Glassdoor SG feeds), with built-in fallback data. Results show a **live vs sample** banner, **skill tags**, match score, source badge, and links to save matches as applications.
+- **Gamification** — XP, levels, streaks, badges, daily quests on the dashboard. Mutating actions show **XP toasts** when game mode is enabled in profile. **Valorant-style rank tiers** (Iron → Radiant) based on level.
+- **Admin console** — `/admin` overview stats, user list (`/admin/users`) with **promote/demote** and **delete user**, plus community moderation (`/admin/community` hide public posts).
 - **Database inspection** — `npm run db:users` (CLI user table) and `npm run db:studio` (Prisma Studio GUI).
+- **Branding** — SVG logo in header + favicon (`src/app/icon.svg`).
 
 After pulling schema changes, run `npx prisma db push` and regenerate the client. On **Windows**, if `prisma generate` fails with **EPERM** while the dev server is running, stop `npm run dev`, then run `npm run db:generate` (frees common ports and runs `prisma generate`), then start dev again.
 
@@ -144,6 +143,10 @@ Application **status** enum: `WISHLIST`, `APPLIED`, `INTERVIEW`, `OFFER`, `REJEC
 
 - Session required for workspace and profile APIs. Exceptions include `POST /api/register`, `/api/auth/*`, `POST /api/forgot-password`, `POST /api/reset-password` (rate limiting recommended for production).
 - Unauthenticated requests to protected APIs return **401**.
+- Mutating workspace APIs (e.g. `POST /api/applications`, STAR/Q&A create) may include a **`gamification`** object in the JSON response when game mode is enabled (used for XP toasts on the client).
+- **Admin APIs** (session + `ADMIN` role or `ADMIN_EMAILS` on login): `GET /api/admin/stats`, `GET /api/admin/users`, `PATCH /api/admin/users/[id]` (role), `DELETE /api/admin/users/[id]`, `GET /api/admin/community`, `PATCH /api/admin/community/star-stories/[id]`, `PATCH /api/admin/community/interview-questions/[id]`. Non-admins receive **403**.
+- **Resume extract** — `POST /api/resume/extract` (multipart `file`, PDF or text) for Job Match Assistant PDF uploads.
+- **Job match pagination** — `POST /api/job-match` accepts optional `page` and `limit`; response `meta` includes `total`, `totalPages`.
 
 Example `POST /api/applications` body (Zod-validated):
 
@@ -163,12 +166,15 @@ Example `POST /api/applications` body (Zod-validated):
 
 ## Quick smoke test
 
-1. Set `.env` (`AUTH_SECRET`, `DATABASE_URL`, `AUTH_URL`).
+1. Set `.env` (`AUTH_SECRET`, `DATABASE_URL`, `AUTH_URL`). Optionally set `ADMIN_EMAILS` for admin access.
 2. `npx prisma db push` and `npm run dev`.
-3. `/signup` → `/dashboard` → `/applications` (add one application).
+3. `/signup` → `/dashboard` → `/applications` (add one application; XP toast if gamification is on).
 4. `/profile` — save display name and a link.
 5. `/interview` — add a STAR story, enable **Community feed**, open `/community`.
-6. `GET /api/applications` without a session cookie → **401**.
+6. `/companies` — run Job Match Assistant; confirm live/sample banner and skill tags on results.
+7. `npm run db:users` — prints users in the terminal; `npm run db:studio` opens Prisma Studio.
+8. Log out/in with an `ADMIN_EMAILS` account → `/admin` and user/community moderation pages.
+9. `GET /api/applications` without a session cookie → **401**.
 
 ## Project structure (high level)
 
@@ -177,9 +183,13 @@ prisma/
   schema.prisma
 scripts/
   db-generate.mjs       # Windows-friendly prisma generate
+  list-users.mjs        # npm run db:users
+DEPLOYMENT.md           # Vercel + Neon/Supabase deploy guide
 src/
   app/
-    api/                 # REST: applications, profile, auth, register, forgot/reset password, …
+    api/                 # REST: applications, profile, auth, admin, job-match, …
+    api/admin/           # Admin stats, users, community moderation
+    admin/               # Admin console UI (overview, users, community)
     community/           # Public community pages
     about/, features/, faq/
     dashboard/, applications/, lab/, interview/, companies/
@@ -191,16 +201,36 @@ src/
   auth.ts
   middleware.ts
   components/
+    site-logo.tsx
+    gamification-toast.tsx
   lib/
+    gamification-ranks.ts
     prisma.ts
     validation.ts
     pipeline-insights.ts
+    gamification.ts
+    gamification-response.ts
+    admin.ts
+    job-match.ts
     session-user.ts
     …
   types/
 ```
 
 Document uploads use `public/uploads/documents/` locally; use object storage for production serverless deployments.
+
+## Making the repo public
+
+Before publishing on GitHub:
+
+1. Confirm `.env` is **not** tracked (see `.gitignore`; only `.env.example` is committed).
+2. Rotate `AUTH_SECRET` and database passwords if they were ever shared.
+3. Set `ADMIN_EMAILS` in production only — not in the public example values.
+4. Read [SECURITY.md](./SECURITY.md) for reporting vulnerabilities.
+5. CI runs on push/PR via [`.github/workflows/ci.yml`](.github/workflows/ci.yml) (`lint` + `build`).
+6. License: [MIT](./LICENSE).
+
+After going public, deploy using [DEPLOYMENT.md](./DEPLOYMENT.md) and add your live URL to the repo description.
 
 ## Deployment
 

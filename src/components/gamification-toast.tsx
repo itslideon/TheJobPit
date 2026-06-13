@@ -10,6 +10,7 @@ import {
 } from "react";
 import type { GamificationReward } from "@/lib/gamification-types";
 import { BADGE_DEFS } from "@/lib/gamification";
+import { badgeIcon } from "@/lib/gamification-ranks";
 
 type ToastItem = {
   id: string;
@@ -40,16 +41,18 @@ function RewardToast({ item, onDone }: { item: ToastItem; onDone: (id: string) =
           Combat report
         </p>
         <p className="mt-1 text-sm font-semibold text-zinc-50">
-          +{reward.xpGain} XP · Level {reward.level}
+          +{reward.xpGain} XP · {reward.rankIcon} {reward.rankName} · Lv {reward.level}
         </p>
         <p className="mt-0.5 text-xs text-zinc-400">
           {reward.streakDays} day streak
-          {reward.leveledUp ? " · Rank up!" : ""}
+          {reward.leveledUp ? ` · Promoted to ${reward.rankName}!` : ""}
         </p>
         {reward.newBadges.length > 0 ? (
           <ul className="mt-2 space-y-1 text-xs text-amber-200/90">
             {reward.newBadges.map((key) => (
-              <li key={key}>Badge unlocked: {badgeTitle(key)}</li>
+              <li key={key}>
+                {badgeIcon(key)} Badge unlocked: {badgeTitle(key)}
+              </li>
             ))}
           </ul>
         ) : null}

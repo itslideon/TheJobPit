@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { UserMenu } from "@/components/user-menu";
+import { SiteLogo } from "@/components/site-logo";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard" },
@@ -37,11 +38,8 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-zinc-800/80 bg-zinc-950/85 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-6">
-        <Link
-          href="/"
-          className="pit-logo-shimmer shrink-0 text-lg font-bold tracking-tight transition hover:opacity-95"
-        >
-          The Job Pit
+        <Link href="/" className="shrink-0 transition hover:opacity-95">
+          <SiteLogo />
         </Link>
         {status === "authenticated" ? (
           <div className="flex min-w-0 flex-1 items-center justify-end pl-2">

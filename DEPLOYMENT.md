@@ -74,7 +74,11 @@ npm run db:studio    # GUI at http://localhost:5555
 npm run db:users     # CLI table of users
 ```
 
-## 7. Custom domain (optional)
+## 7. GitHub Actions CI
+
+The repository includes a CI workflow that runs `npm ci`, `prisma generate`, `npm run lint`, and `npm run build` on pushes and pull requests to `main`.
+
+## 8. Custom domain (optional)
 
 In Vercel → **Settings → Domains**, add your domain. Update `AUTH_URL` to match the canonical HTTPS URL and redeploy.
 

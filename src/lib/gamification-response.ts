@@ -1,5 +1,6 @@
 import type { GamificationReward } from "@/lib/gamification-types";
 import { awardGamification, XP_BY_ACTION } from "@/lib/gamification";
+import { rankForLevel } from "@/lib/gamification-ranks";
 
 type AwardAction = keyof typeof XP_BY_ACTION;
 
@@ -9,9 +10,12 @@ export async function awardAndBuildReward(
 ): Promise<GamificationReward | null> {
   const result = await awardGamification(userId, action);
   if (!result) return null;
+  const rank = rankForLevel(result.level);
   return {
     ...result,
-    xpGain: XP_BY_ACTION[action] ?? 0
+    xpGain: XP_BY_ACTION[action] ?? 0,
+    rankName: rank.name,
+    rankIcon: rank.icon
   };
 }
 
@@ -32,6 +36,7 @@ export function mergeGamificationRewards(
   const xpGain = valid.reduce((sum, r) => sum + r.xpGain, 0);
   const newBadges = [...new Set(valid.flatMap((r) => r.newBadges))];
   const leveledUp = valid.some((r) => r.leveledUp);
+  const rank = rankForLevel(last.level);
   return {
     xp: last.xp,
     level: last.level,
@@ -39,6 +44,8 @@ export function mergeGamificationRewards(
     longestStreakDays: last.longestStreakDays,
     leveledUp,
     newBadges,
-    xpGain
+    xpGain,
+    rankName: rank.name,
+    rankIcon: rank.icon
   };
 }

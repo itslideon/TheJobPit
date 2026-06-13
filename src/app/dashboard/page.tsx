@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { buildPipelineChartData, computePipelineMetrics } from "@/lib/pipeline-insights";
 import { getGamificationOverview } from "@/lib/gamification";
 import { userIsAdmin } from "@/lib/admin";
+import { badgeIcon, rankForLevel } from "@/lib/gamification-ranks";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -27,6 +28,7 @@ export default async function DashboardPage() {
   const progressInLevel = Math.max(0, game.profile.xp - currentLevelStartXp);
   const progressTarget = Math.max(1, nextLevelXp - currentLevelStartXp);
   const progressPct = Math.min(100, Math.round((progressInLevel / progressTarget) * 100));
+  const rank = rankForLevel(game.profile.level);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-8 px-6 py-10">
@@ -101,6 +103,13 @@ export default async function DashboardPage() {
             <p className="mt-1 text-sm text-zinc-400">
               Valorant-style progression based on meaningful prep actions.
             </p>
+            <div
+              className={`mt-3 inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm ${rank.ring} bg-zinc-900/50`}
+            >
+              <span aria-hidden>{rank.icon}</span>
+              <span className={`font-semibold ${rank.text}`}>{rank.name}</span>
+              <span className="text-zinc-500">· Level {game.profile.level}</span>
+            </div>
             {!game.profile.gamificationEnabled ? (
               <p className="mt-2 text-xs text-amber-300/90">
                 Game mode is currently off in your profile settings.
@@ -208,9 +217,10 @@ export default async function DashboardPage() {
                 {game.badges.slice(0, 8).map((badge) => (
                   <span
                     key={badge.key}
-                    className="rounded-md border border-teal-500/25 bg-teal-950/30 px-2.5 py-1 text-xs text-teal-200/90"
+                    className="inline-flex items-center gap-1 rounded-md border border-teal-500/25 bg-teal-950/30 px-2.5 py-1 text-xs text-teal-200/90"
                     title={badge.detail}
                   >
+                    <span aria-hidden>{badgeIcon(badge.key)}</span>
                     {badge.title}
                   </span>
                 ))}
