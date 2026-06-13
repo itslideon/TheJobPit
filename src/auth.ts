@@ -38,10 +38,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
+        const { syncAdminRoleForEmail } = await import("@/lib/admin");
+        await syncAdminRoleForEmail(user.id, user.email);
+
+        const refreshed = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { id: true, email: true, name: true, role: true }
+        });
+
         return {
-          id: user.id,
-          email: user.email,
-          name: user.name
+          id: refreshed!.id,
+          email: refreshed!.email,
+          name: refreshed!.name,
+          role: refreshed!.role
         };
       }
     })
@@ -50,12 +59,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.role = (user as { role?: string }).role ?? "USER";
       }
       return token;
     },
     session({ session, token }) {
       if (session.user && token.id) {
         session.user.id = token.id as string;
+        session.user.role = (token.role as "USER" | "ADMIN") ?? "USER";
       }
       return session;
     }

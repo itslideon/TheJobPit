@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { FormEvent, useState } from "react";
+import { useRewardedFetch } from "@/lib/rewarded-fetch";
 
 export type ProfileFormInitial = {
   name: string | null;
@@ -25,6 +26,7 @@ type Props = {
 export function ProfileForm({ email, initial }: Props) {
   const router = useRouter();
   const { update } = useSession();
+  const { readJsonWithReward } = useRewardedFetch();
   const [name, setName] = useState(initial.name ?? "");
   const [headline, setHeadline] = useState(initial.headline ?? "");
   const [bio, setBio] = useState(initial.bio ?? "");
@@ -60,7 +62,7 @@ export function ProfileForm({ email, initial }: Props) {
         gamificationEnabled
       })
     });
-    const body = (await res.json().catch(() => ({}))) as {
+    const body = (await readJsonWithReward(res)) as {
       error?: string;
       details?: unknown;
       data?: { name: string | null };

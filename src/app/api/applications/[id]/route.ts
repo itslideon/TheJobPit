@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/session-user";
 import { updateApplicationSchema } from "@/lib/validation";
-import { awardGamification } from "@/lib/gamification";
+import { awardAndBuildReward, jsonWithGamification } from "@/lib/gamification-response";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -51,11 +51,12 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     data: parseResult.data
   });
 
+  let reward = null;
   if (parseResult.data.status && parseResult.data.status !== existing.status) {
-    await awardGamification(userId, "application_status_update");
+    reward = await awardAndBuildReward(userId, "application_status_update");
   }
 
-  return NextResponse.json({ data: application });
+  return NextResponse.json(jsonWithGamification({ data: application }, reward));
 }
 
 export async function DELETE(_request: Request, { params }: RouteContext) {

@@ -31,6 +31,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const matches = await matchOpenings(parsed.data);
-  return NextResponse.json({ data: matches });
+  const { matches, meta } = await matchOpenings(parsed.data);
+  return NextResponse.json({ data: matches, meta });
 }

@@ -32,6 +32,8 @@ export function UserMenu() {
 
   const onProfile = pathname === "/profile" || pathname.startsWith("/profile/");
   const onCommunity = pathname === "/community" || pathname.startsWith("/community/");
+  const onAdmin = pathname === "/admin" || pathname.startsWith("/admin/");
+  const isAdmin = session?.user?.role === "ADMIN";
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
@@ -101,6 +103,18 @@ export function UserMenu() {
           >
             Community
           </Link>
+          {isAdmin ? (
+            <Link
+              role="menuitem"
+              href="/admin"
+              onClick={() => setOpen(false)}
+              className={`block px-3 py-2.5 text-sm transition ${
+                onAdmin ? "bg-rose-500/10 text-rose-100" : "text-zinc-300 hover:bg-zinc-800/80"
+              }`}
+            >
+              Admin
+            </Link>
+          ) : null}
           <div className="my-1 border-t border-zinc-800/90" />
           <button
             type="button"

@@ -433,8 +433,21 @@ async function fetchLiveOpenings(input: MatchInput): Promise<Opening[]> {
   return dedupeOpenings([...mcfOpenings, ...linkedinOpenings, ...glassdoorOpenings]);
 }
 
-export async function matchOpenings(input: MatchInput): Promise<MatchResult[]> {
+export async function matchOpenings(input: MatchInput): Promise<{
+  matches: MatchResult[];
+  meta: { usedFallback: boolean; liveCount: number; sourceSummary: string };
+}> {
   const live = await fetchLiveOpenings(input);
+  const usedFallback = live.length === 0;
   const source = live.length > 0 ? live : FALLBACK_OPENINGS;
-  return scoreOpenings(input, source);
+  const matches = scoreOpenings(input, source);
+  const sources = [...new Set(source.map((o) => o.source))];
+  return {
+    matches,
+    meta: {
+      usedFallback,
+      liveCount: live.length,
+      sourceSummary: usedFallback ? "Sample data (live feeds unavailable)" : sources.join(", ")
+    }
+  };
 }

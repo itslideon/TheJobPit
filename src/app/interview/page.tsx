@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import { useRewardedFetch } from "@/lib/rewarded-fetch";
 
 type Application = { id: string; company: string; role: string };
 
@@ -37,6 +38,7 @@ type MockRow = {
 type Tab = "star" | "questions" | "mock";
 
 export default function InterviewPage() {
+  const { readJsonWithReward } = useRewardedFetch();
   const [tab, setTab] = useState<Tab>("star");
   const [applications, setApplications] = useState<Application[]>([]);
   const [filterApp, setFilterApp] = useState("");
@@ -112,7 +114,7 @@ export default function InterviewPage() {
     e.preventDefault();
     const shareCompany =
       starForm.isPublic && starForm.shareCompanyContext && Boolean(filterApp);
-    await fetch("/api/star-stories", {
+    const res = await fetch("/api/star-stories", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -126,6 +128,7 @@ export default function InterviewPage() {
         shareCompanyContext: shareCompany
       })
     });
+    await readJsonWithReward(res);
     setStarForm({
       title: "",
       situation: "",
@@ -139,11 +142,12 @@ export default function InterviewPage() {
   }
 
   async function patchStar(id: string, patch: { isPublic?: boolean; shareCompanyContext?: boolean }) {
-    await fetch(`/api/star-stories/${id}`, {
+    const res = await fetch(`/api/star-stories/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patch)
     });
+    await readJsonWithReward(res);
     await loadStars();
   }
 
@@ -155,7 +159,7 @@ export default function InterviewPage() {
 
   async function addQ(e: FormEvent) {
     e.preventDefault();
-    await fetch("/api/interview-questions", {
+    const res = await fetch("/api/interview-questions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -166,16 +170,18 @@ export default function InterviewPage() {
         isPublic: qForm.isPublic
       })
     });
+    await readJsonWithReward(res);
     setQForm({ question: "", answer: "", category: "", isPublic: false });
     await loadQuestions();
   }
 
   async function patchQ(id: string, isPublic: boolean) {
-    await fetch(`/api/interview-questions/${id}`, {
+    const res = await fetch(`/api/interview-questions/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isPublic })
     });
+    await readJsonWithReward(res);
     await loadQuestions();
   }
 
@@ -188,7 +194,7 @@ export default function InterviewPage() {
   async function addMock(e: FormEvent) {
     e.preventDefault();
     if (!mockForm.applicationId) return;
-    await fetch("/api/mock-interviews", {
+    const res = await fetch("/api/mock-interviews", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -200,6 +206,7 @@ export default function InterviewPage() {
         rating: mockForm.rating ? Number(mockForm.rating) : undefined
       })
     });
+    await readJsonWithReward(res);
     setMockForm({ applicationId: "", occurredAt: "", notes: "", rating: "" });
     await loadMocks();
   }

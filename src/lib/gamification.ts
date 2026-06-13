@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-const XP_BY_ACTION: Record<string, number> = {
+export const XP_BY_ACTION = {
   application_create: 30,
   application_status_update: 12,
   star_story_create: 24,

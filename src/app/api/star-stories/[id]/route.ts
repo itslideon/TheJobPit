@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/session-user";
 import { updateStarStorySchema } from "@/lib/validation";
-import { awardGamification } from "@/lib/gamification";
+import { awardAndBuildReward, jsonWithGamification } from "@/lib/gamification-response";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -57,10 +57,11 @@ export async function PATCH(request: Request, { params }: Ctx) {
       shareCompanyContext
     }
   });
+  let reward = null;
   if (!existing.isPublic && data.isPublic) {
-    await awardGamification(userId, "community_share");
+    reward = await awardAndBuildReward(userId, "community_share");
   }
-  return NextResponse.json({ data });
+  return NextResponse.json(jsonWithGamification({ data }, reward));
 }
 
 export async function DELETE(_request: Request, { params }: Ctx) {

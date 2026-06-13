@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/session-user";
 import { createApplicationSchema } from "@/lib/validation";
-import { awardGamification } from "@/lib/gamification";
+import { awardAndBuildReward, jsonWithGamification } from "@/lib/gamification-response";
 
 export async function GET() {
   const { userId, response } = await requireUserId();
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     }
   });
 
-  await awardGamification(userId, "application_create");
+  const reward = await awardAndBuildReward(userId, "application_create");
 
-  return NextResponse.json({ data: application }, { status: 201 });
+  return NextResponse.json(jsonWithGamification({ data: application }, reward), { status: 201 });
 }

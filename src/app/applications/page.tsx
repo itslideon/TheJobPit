@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { APPLICATION_STATUSES, type ApplicationStatus } from "@/types/application";
+import { useRewardedFetch } from "@/lib/rewarded-fetch";
 
 type ApplicationRecord = {
   id: string;
@@ -87,6 +88,7 @@ function formatDate(value: string | null) {
 }
 
 export default function ApplicationsPage() {
+  const { readJsonWithReward } = useRewardedFetch();
   const [applications, setApplications] = useState<ApplicationRecord[]>([]);
   const [formState, setFormState] = useState<FormState>(defaultFormState);
   const [isLoading, setIsLoading] = useState(true);
@@ -163,6 +165,7 @@ export default function ApplicationsPage() {
         throw new Error("Could not create application.");
       }
 
+      await readJsonWithReward(response);
       setFormState(defaultFormState);
       setFeedback("Application added.");
       await loadApplications();
@@ -187,6 +190,7 @@ export default function ApplicationsPage() {
         throw new Error("Status update failed.");
       }
 
+      await readJsonWithReward(response);
       setFeedback("Status updated.");
       await loadApplications();
     } catch (error) {

@@ -5,6 +5,7 @@ import { PipelineChart } from "@/components/pipeline-chart";
 import { redirect } from "next/navigation";
 import { buildPipelineChartData, computePipelineMetrics } from "@/lib/pipeline-insights";
 import { getGamificationOverview } from "@/lib/gamification";
+import { userIsAdmin } from "@/lib/admin";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -20,6 +21,7 @@ export default async function DashboardPage() {
   const chartData = buildPipelineChartData(applications);
   const metrics = computePipelineMetrics(applications);
   const game = await getGamificationOverview(session.user.id);
+  const isAdmin = await userIsAdmin(session.user.id);
   const nextLevelXp = game.profile.level * 100;
   const currentLevelStartXp = (game.profile.level - 1) * 100;
   const progressInLevel = Math.max(0, game.profile.xp - currentLevelStartXp);
@@ -50,6 +52,11 @@ export default async function DashboardPage() {
           <Link className="pit-btn-secondary" href="/companies">
             Company intel
           </Link>
+          {isAdmin ? (
+            <Link className="pit-btn-secondary border-rose-500/30 text-rose-200" href="/admin">
+              Admin console
+            </Link>
+          ) : null}
           <Link
             className="rounded-lg border border-dashed border-zinc-600 px-4 py-2 text-sm font-medium text-zinc-500 transition hover:border-teal-500/40 hover:text-zinc-300"
             href="/api/applications"

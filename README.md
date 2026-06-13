@@ -37,6 +37,7 @@ This app is both practical for your own search and a strong portfolio piece beca
 | `/` | Landing; signed-in users see a live **snapshot** (metrics + chart) |
 | `/dashboard`, `/applications`, `/lab`, `/interview`, `/companies` | Workspace — **requires sign-in** |
 | `/profile` | Edit profile (name, bio, links) — **requires sign-in** |
+| `/admin`, `/admin/users`, `/admin/community` | **Admin console** — users, stats, community moderation |
 | `/community`, `/community/star/[id]`, `/community/question/[id]` | **Public** reads of opt-in shared STAR stories and Q&A |
 | `/about`, `/features`, `/faq` | Marketing |
 | `/login`, `/signup`, `/forgot-password`, `/reset-password` | Auth flows |
@@ -44,7 +45,9 @@ This app is both practical for your own search and a strong portfolio piece beca
 
 Signed-in users get a **header account menu** (profile icon): Profile, Community, Log out.
 
-Middleware redirects unauthenticated users to `/login?callbackUrl=…` for protected paths (`/dashboard`, `/applications`, `/lab`, `/interview`, `/companies`, `/profile`). `/community` stays **public** (read-only browsing).
+Middleware redirects unauthenticated users to `/login?callbackUrl=…` for protected paths (`/dashboard`, `/applications`, `/lab`, `/interview`, `/companies`, `/profile`, `/admin`). `/community` stays **public** (read-only browsing).
+
+Admin access: set `ADMIN_EMAILS` in `.env` (comma-separated). Those users are promoted to `ADMIN` on login and can open `/admin`.
 
 ## Features (current scope)
 
@@ -55,7 +58,10 @@ Middleware redirects unauthenticated users to `/login?callbackUrl=…` for prote
 - **Interview prep** — STAR stories, questions, mock notes (session APIs). Users can **share** individual STAR stories or Q&A to `/community` (opt-in flags on each record).
 - **Community** — Lists only content marked public; author display uses **profile** fields (no email shown).
 - **Polished legal + account UX** — Terms page now uses highlighted section cards; signed-in header uses a profile icon dropdown for account actions.
-- **Job Match Assistant** (inside `/companies`) — enter target company/role/type/location, optional resume text/upload, and fetch ranked potential openings. Aggregates Singapore-focused sources (MyCareersFuture plus optional LinkedIn SG / Glassdoor SG feeds), with built-in fallback data.
+- **Job Match Assistant** (inside `/companies`) — enter target company/role/type/location, optional resume text/upload, and fetch ranked potential openings. Aggregates Singapore-focused sources (MyCareersFuture plus optional LinkedIn SG / Glassdoor SG feeds), with built-in fallback data and live/sample indicators on results.
+- **Gamification** — XP, levels, streaks, badges, daily quests on the dashboard. Mutating actions show **XP toasts** when game mode is enabled in profile.
+- **Admin console** — `/admin` overview stats, user list (`/admin/users`), and community moderation (`/admin/community` hide public posts).
+- **Database inspection** — `npm run db:users` (CLI user table) and `npm run db:studio` (Prisma Studio GUI).
 
 After pulling schema changes, run `npx prisma db push` and regenerate the client. On **Windows**, if `prisma generate` fails with **EPERM** while the dev server is running, stop `npm run dev`, then run `npm run db:generate` (frees common ports and runs `prisma generate`), then start dev again.
 
@@ -84,6 +90,7 @@ Copy `.env.example` to `.env` and set:
 | `AUTH_URL` | App origin, e.g. `http://localhost:3000` |
 | `RESEND_API_KEY` | *(Optional)* Send password-reset emails via [Resend](https://resend.com) |
 | `EMAIL_FROM` | *(Optional)* From address for Resend (must be allowed for your domain) |
+| `ADMIN_EMAILS` | *(Optional)* Comma-separated emails promoted to admin on login |
 | `JOB_MATCH_USE_LIVE` | *(Optional)* `1` to use live MyCareersFuture source (default), `0` for local sample data only |
 | `MCF_API_URL` | *(Optional)* Override MyCareersFuture endpoint |
 | `LINKEDIN_SG_FEED_URL` | *(Optional)* Your proxy/feed endpoint returning LinkedIn SG jobs in JSON |
@@ -119,11 +126,12 @@ Open `http://localhost:3000`, sign up at `/signup`, then explore the dashboard a
 | `npm run lint` | ESLint |
 | `npm run db:push` | `prisma db push` |
 | `npm run db:generate` | Frees ports 3000–3003 (Windows) then `prisma generate` |
-| `npm run db:studio` | Prisma Studio |
+| `npm run db:studio` | Prisma Studio (GUI at http://localhost:5555) |
+| `npm run db:users` | Print users + activity counts in the terminal |
 
 ## Data model (overview)
 
-- **`User`** — email, password hash, name; profile fields (`headline`, `bio`, `location`, `phone`, `linkedinUrl`, `githubUrl`, `twitterUrl`, `websiteUrl`); owns applications and related records.
+- **`User`** — email, password hash, name, **`role`** (`USER` \| `ADMIN`); profile fields (`headline`, `bio`, `location`, `phone`, `linkedinUrl`, `githubUrl`, `twitterUrl`, `websiteUrl`); owns applications and related records.
 - **`PasswordResetToken`** — hashed token, expiry, tied to user (password reset flow).
 - **`Application`** — company, role, status, dates, notes; scoped by `userId`.
 - **`StarStory`** — STAR fields; optional `applicationId`; **`isPublic`**, **`shareCompanyContext`** for community (company/role shown only when linked application exists and user opts in).
@@ -196,4 +204,6 @@ Document uploads use `public/uploads/documents/` locally; use object storage for
 
 ## Deployment
 
-Set `DATABASE_URL`, `AUTH_SECRET`, and `AUTH_URL` to your production URL. Add `RESEND_API_KEY` and `EMAIL_FROM` if you want password-reset emails in production. Run `prisma db push` or your migration workflow against the production database.
+See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for a step-by-step Vercel + Neon/Supabase guide.
+
+Quick summary: set `DATABASE_URL`, `AUTH_SECRET`, and `AUTH_URL` to your production URL. Add `RESEND_API_KEY` and `EMAIL_FROM` for password-reset emails. Add `ADMIN_EMAILS` for admin access. Run `prisma db push` against the production database after schema changes.

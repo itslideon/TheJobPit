@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/session-user";
 import { createStarStorySchema } from "@/lib/validation";
-import { awardGamification } from "@/lib/gamification";
+import { awardAndBuildReward, jsonWithGamification, mergeGamificationRewards } from "@/lib/gamification-response";
 
 export async function GET(request: Request) {
   const { userId, response } = await requireUserId();
@@ -56,10 +56,10 @@ export async function POST(request: Request) {
     }
   });
 
-  await awardGamification(userId, "star_story_create");
-  if (data.isPublic) {
-    await awardGamification(userId, "community_share");
-  }
+  const reward = mergeGamificationRewards(
+    await awardAndBuildReward(userId, "star_story_create"),
+    data.isPublic ? await awardAndBuildReward(userId, "community_share") : null
+  );
 
-  return NextResponse.json({ data }, { status: 201 });
+  return NextResponse.json(jsonWithGamification({ data }, reward), { status: 201 });
 }

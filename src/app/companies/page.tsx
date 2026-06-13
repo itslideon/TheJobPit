@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import { useRewardedFetch } from "@/lib/rewarded-fetch";
 
 type Contact = {
   id: string;
@@ -35,11 +36,19 @@ type OpeningMatch = {
   url: string;
   summary: string;
   source: string;
+  skills: string[];
   score: number;
   reasons: string[];
 };
 
+type MatchMeta = {
+  usedFallback: boolean;
+  liveCount: number;
+  sourceSummary: string;
+};
+
 export default function CompaniesPage() {
+  const { readJsonWithReward } = useRewardedFetch();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -70,6 +79,7 @@ export default function CompaniesPage() {
   const [resumeFileName, setResumeFileName] = useState("");
   const [resumeText, setResumeText] = useState("");
   const [matches, setMatches] = useState<OpeningMatch[]>([]);
+  const [matchMeta, setMatchMeta] = useState<MatchMeta | null>(null);
   const [matchLoading, setMatchLoading] = useState(false);
   const [matchError, setMatchError] = useState("");
   const [saveStatus, setSaveStatus] = useState<string>("");
@@ -182,6 +192,7 @@ export default function CompaniesPage() {
     setMatchLoading(true);
     setMatchError("");
     setSaveStatus("");
+    setMatchMeta(null);
     const skills = jobForm.skills
       .split(",")
       .map((s) => s.trim())
@@ -202,6 +213,7 @@ export default function CompaniesPage() {
     const body = (await res.json().catch(() => ({}))) as {
       error?: string;
       data?: OpeningMatch[];
+      meta?: MatchMeta;
     };
     setMatchLoading(false);
     if (!res.ok) {
@@ -209,6 +221,7 @@ export default function CompaniesPage() {
       return;
     }
     setMatches(body.data ?? []);
+    setMatchMeta(body.meta ?? null);
   }
 
   async function saveAsApplication(match: OpeningMatch) {
@@ -229,6 +242,7 @@ export default function CompaniesPage() {
       setSaveStatus("Could not save match as application.");
       return;
     }
+    await readJsonWithReward(res);
     setSaveStatus(`Saved ${match.company} - ${match.role} to Applications.`);
   }
 
@@ -310,6 +324,17 @@ export default function CompaniesPage() {
           <p className="mt-1 text-xs text-zinc-500">
             Ranked by role/company/preferences + resume/skills overlap.
           </p>
+          {matchMeta ? (
+            <p
+              className={`mt-2 text-xs ${
+                matchMeta.usedFallback ? "text-amber-300/90" : "text-teal-300/90"
+              }`}
+            >
+              {matchMeta.usedFallback
+                ? "Using sample listings — live feeds unavailable."
+                : `Live feed · ${matchMeta.liveCount} openings · ${matchMeta.sourceSummary}`}
+            </p>
+          ) : null}
           {saveStatus ? <p className="mt-3 text-sm text-teal-300/90">{saveStatus}</p> : null}
           {matches.length === 0 ? (
             <p className="mt-5 text-sm text-zinc-500">
@@ -338,6 +363,18 @@ export default function CompaniesPage() {
                     </div>
                   </div>
                   <p className="mt-2 text-sm text-zinc-400">{m.summary}</p>
+                  {m.skills?.length ? (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {m.skills.slice(0, 6).map((skill) => (
+                        <span
+                          key={skill}
+                          className="rounded bg-zinc-800/80 px-2 py-0.5 text-[10px] uppercase tracking-wide text-zinc-400"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
                   <ul className="mt-2 space-y-1 text-xs text-zinc-500">
                     {m.reasons.slice(0, 3).map((r) => (
                       <li key={r}>- {r}</li>

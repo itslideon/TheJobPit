@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/session-user";
 import { updateProfileSchema } from "@/lib/validation";
-import { awardGamification } from "@/lib/gamification";
+import { awardAndBuildReward, jsonWithGamification } from "@/lib/gamification-response";
 
 const profileSelect = {
   id: true,
@@ -73,7 +73,7 @@ export async function PATCH(request: Request) {
     select: profileSelect
   });
 
-  await awardGamification(userId, "profile_update");
+  const reward = await awardAndBuildReward(userId, "profile_update");
 
-  return NextResponse.json({ data });
+  return NextResponse.json(jsonWithGamification({ data }, reward));
 }
