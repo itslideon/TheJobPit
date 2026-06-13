@@ -127,6 +127,7 @@ Open `http://localhost:3000`, sign up at `/signup`, then explore the dashboard a
 | `npm run db:generate` | Frees ports 3000–3003 (Windows) then `prisma generate` |
 | `npm run db:studio` | Prisma Studio (GUI at http://localhost:5555) |
 | `npm run db:users` | Print users + activity counts in the terminal |
+| `npm run db:wipe` | **Destructive:** delete all users and related data (`CONFIRM_WIPE=yes npm run db:wipe`) |
 
 ## Data model (overview)
 
